@@ -2,8 +2,8 @@
 " Description:	Colorize all text in the form #rrggbb or #rgb
 " Maintainer:	lilydjwg <lilydjwg@gmail.com>
 " Licence:	No Warranties. Do whatever you want with this. But please tell me!
-" Last Change:  2011-05-06
-" Version:	1.2
+" Last Change:	2011-05-04
+" Version:	1.2.1
 " Usage:	This file should reside in the plugin directory.
 " Derived From: css_color.vim
 " 		http://www.vim.org/scripts/script.php?script_id=2150
@@ -191,7 +191,7 @@ command -bar ColorHighlight call s:ColorHighlight(1)
 command -bar ColorClear call s:ColorClear()
 command -bar ColorToggle call s:ColorToggle()
 nnoremap <unique> <silent> <Plug>Colorizer :ColorToggle<CR>
-if !hasmapto("<Plug>Colorizer") && !exists("g:colorizer_nomap") && g:colorizer_nomap == 0
+if !hasmapto("<Plug>Colorizer") && !exists("g:colorizer_nomap") || g:colorizer_nomap == 0
   nmap <unique> <Leader>tc <Plug>Colorizer
 endif
 " Cleanup and modelines {{{1
