@@ -3,11 +3,11 @@
 " Maintainer:	lilydjwg <lilydjwg@gmail.com>
 " Licence:	No Warranties. Do whatever you want with this. But please tell me!
 " Last Change:	2011-05-06
-" Version:	1.2.1
+" Version:	1.2.2
 " Usage:	This file should reside in the plugin directory.
 " Derived From: css_color.vim
 " 		http://www.vim.org/scripts/script.php?script_id=2150
-" Thanks To:	Niklas Hofer (Author of css_color.vim), Ingo Karkat
+" Thanks To:	Niklas Hofer (Author of css_color.vim), Ingo Karkat, rykka
 " Usage:
 "
 " This plugin defines four commands:
@@ -17,12 +17,21 @@
 " 	ColorToggle     - toggle highlights
 "       ColorizerBuffer - highlight current buffer
 "
-" By default, <leader>tc is mapped to ColorToggle. If you want to use another
-" key map, do like this:
-" 	nmap ,tc <Plug>Colorizer
+" buffers of css and html filetype are highlighted by default.
 "
-" If you want completely not to map it, set the following in your vimrc:
+" Mappings:
+" By default, the following are mapped:
+" 	<leader>tc is mapped to ColorToggle
+" 	<leader>cbb is mapped to ColorizerBuffer
+" If you want to use another key map, do like this:
+" 	nmap ,tc <Plug>Colorizer
+" 	nmap ,cbb <Plug>ColorizerBuffer
+"
+" Configuraion:
+" do not setup any mappings:
 "	let g:colorizer_nomap = 1
+" highlight the following filetype of buffer by default:
+"	let g:colorizer_filetype = 'css,html'
 "
 " Note: if you modify a color string in normal mode, if the cursor is still on
 " that line, it'll take 'updatetime' seconds to update. You can use
@@ -189,48 +198,42 @@ for c in range(0, 254)
   call add(s:colortable, color)
 endfor
 
-" DONE: 110506_2312  
-" light buffer with Filetype (default to css)
-function! colorizer#light_buffer()
-   let w:colormatches = []
-   for i in range(1, line("$"))
-      call s:PreviewColorInLine(i)
-   endfor
-   autocmd CursorHold,CursorHoldI,InsertLeave <buffer> silent call s:PreviewColorInLine('.')
-   autocmd BufEnter <buffer> silent call s:PreviewColorInLine('.')
+function s:ColorBuffer()"{{{2
+  let w:colormatches = []
+  for i in range(1, line("$"))
+    call s:PreviewColorInLine(i)
+  endfor
+  autocmd CursorHold,CursorHoldI,InsertLeave <buffer> silent call s:PreviewColorInLine('.')
+  autocmd BufEnter <buffer> silent call s:PreviewColorInLine('.')
 endfunction
 
-" filetype light option
-" g:colorizer_filetype = "css,vim"
+"Highlight according to filetypes {{{2
 if !exists("g:colorizer_filetype")
-   let g:colorizer_filetype='css,vim'
+  let g:colorizer_filetype = 'css,html'
 endif
 
-let types=split(g:colorizer_filetype,',')
-aug colorizer_filetype
-   au!
-   for type in types
-      exe 'autocmd Filetype '.type.' ColorizerBuffer'
-   endfor
-aug END
-" buffer light map
-command -bar ColorizerBuffer call colorizer#light_buffer()
-nnoremap <unique> <silent> <Plug>ColorizerBuffer :ColorizerBuffer<CR>
-if !exists("g:colorizer_nomap")
-   let g:colorizer_nomap = 0
-endif
-if !hasmapto("<Plug>ColorizerBuffer") && g:colorizer_nomap == 0
-  nmap <unique> <leader>cbb <Plug>ColorizerBuffer
-endif
+augroup Colorizer_filetype
+  au!
+  for type in split(g:colorizer_filetype,',')
+    exe 'autocmd Filetype '.type.' ColorizerBuffer'
+  endfor
+augroup END
 
 "Define commands {{{2
 command -bar ColorHighlight call s:ColorHighlight(1)
 command -bar ColorClear call s:ColorClear()
 command -bar ColorToggle call s:ColorToggle()
+command -bar ColorizerBuffer call s:ColorBuffer()
+nnoremap <unique> <silent> <Plug>ColorizerBuffer :ColorizerBuffer<CR>
 nnoremap <unique> <silent> <Plug>Colorizer :ColorToggle<CR>
-if !hasmapto("<Plug>Colorizer") && g:colorizer_nomap == 0
-  nmap <unique> <Leader>tc <Plug>Colorizer
+if !exists("g:colorizer_nomap") || g:colorizer_nomap == 0
+  if !hasmapto("<Plug>Colorizer")
+    nmap <unique> <Leader>tc <Plug>Colorizer
+  endif
+  if !hasmapto("<Plug>ColorizerBuffer")
+    nmap <unique> <leader>cbb <Plug>ColorizerBuffer
+  endif
 endif
 " Cleanup and modelines {{{1
 let &cpo = s:save_cpo
-" vim:ft=vim:fdm=marker:fen:fmr={{{,}}}:
+" vim:ft=vim:fdm=marker:fen:fmr={{{,}}}:sw=2:
