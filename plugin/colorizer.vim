@@ -2,7 +2,7 @@
 " Description:	Colorize all text in the form #rrggbb or #rgb
 " Maintainer:	lilydjwg <lilydjwg@gmail.com>
 " Licence:	No Warranties. Do whatever you want with this. But please tell me!
-" Last Change:	2011-05-04
+" Last Change:	2011-05-06
 " Version:	1.2.1
 " Usage:	This file should reside in the plugin directory.
 " Derived From: css_color.vim
@@ -10,11 +10,12 @@
 " Thanks To:	Niklas Hofer (Author of css_color.vim), Ingo Karkat
 " Usage:
 "
-" This plugin defines three commands:
+" This plugin defines four commands:
 "
 " 	ColorHighlight	- start/update highlighting
 " 	ColorClear      - clear all highlights
 " 	ColorToggle     - toggle highlights
+"       ColorizerBuffer - highlight current buffer
 "
 " By default, <leader>tc is mapped to ColorToggle. If you want to use another
 " key map, do like this:
@@ -49,7 +50,8 @@ function s:FGforBG(bg) "{{{2
   if r*30 + g*59 + b*11 > 12000
     return '#000000'
   else
-    return '#ffffff'
+    " softer 
+    return '#cccccc'
   end
 endfunction
 function s:Rgb2xterm(color) "{{{2
@@ -186,12 +188,47 @@ for c in range(0, 254)
   let color = s:Xterm2rgb(c)
   call add(s:colortable, color)
 endfor
+
+" DONE: 110506_2312  
+" light buffer with Filetype (default to css)
+function! colorizer#light_buffer()
+   let w:colormatches = []
+   for i in range(1, line("$"))
+      call s:PreviewColorInLine(i)
+   endfor
+   autocmd CursorHold,CursorHoldI,InsertLeave <buffer> silent call s:PreviewColorInLine('.')
+   autocmd BufEnter <buffer> silent call s:PreviewColorInLine('.')
+endfunction
+
+" filetype light option
+" g:colorizer_filetype = "css,vim"
+if !exists("g:colorizer_filetype")
+   let g:colorizer_filetype='css,vim'
+endif
+
+let types=split(g:colorizer_filetype,',')
+aug colorizer_filetype
+   au!
+   for type in types
+      exe 'autocmd Filetype '.type.' ColorizerBuffer'
+   endfor
+aug END
+" buffer light map
+command -bar ColorizerBuffer call colorizer#light_buffer()
+nnoremap <unique> <silent> <Plug>ColorizerBuffer :ColorizerBuffer<CR>
+if !exists("g:colorizer_nomap")
+   let g:colorizer_nomap = 0
+endif
+if !hasmapto("<Plug>ColorizerBuffer") && g:colorizer_nomap == 0
+  nmap <unique> <leader>cbb <Plug>ColorizerBuffer
+endif
+
 "Define commands {{{2
 command -bar ColorHighlight call s:ColorHighlight(1)
 command -bar ColorClear call s:ColorClear()
 command -bar ColorToggle call s:ColorToggle()
 nnoremap <unique> <silent> <Plug>Colorizer :ColorToggle<CR>
-if !hasmapto("<Plug>Colorizer") && !exists("g:colorizer_nomap") || g:colorizer_nomap == 0
+if !hasmapto("<Plug>Colorizer") && g:colorizer_nomap == 0
   nmap <unique> <Leader>tc <Plug>Colorizer
 endif
 " Cleanup and modelines {{{1
