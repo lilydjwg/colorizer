@@ -21,8 +21,8 @@
 " If you want completely not to map it, set the following in your vimrc:
 "	let g:colorizer_nomap = 1
 "
-" To use solid color highlight, set this in your vimrc (later change will take
-" effect on next ColorHighlight command):
+" To use solid color highlight, set this in your vimrc (later change won't
+" probably take effect unless you use ':ColorHighlight!' to force update):
 "	let g:colorizer_fgcontrast = -1
 " set it to 0 or 1 to use a softened foregroud color.
 "
@@ -143,7 +143,7 @@ function s:PreviewColorInLine(where) "{{{2
     call s:SetMatcher(foundcolor)
   endwhile
 endfunction
-function s:ColorHighlight(update) "{{{2
+function s:ColorHighlight(update, ...) "{{{2
   if exists('w:colormatches')
     if !a:update
       return
@@ -151,7 +151,7 @@ function s:ColorHighlight(update) "{{{2
     call s:ColorClear()
   endif
   let w:colormatches = {}
-  if g:colorizer_fgcontrast != s:saved_fgcontrast
+  if g:colorizer_fgcontrast != s:saved_fgcontrast || (exists("a:1") && a:1 == '!')
     let s:force_group_update = 1
   endif
   for i in range(1, line("$"))
@@ -213,7 +213,7 @@ elseif g:colorizer_fgcontrast >= len(s:predefined_fgcolors['dark'])
 endif
 let s:saved_fgcontrast = g:colorizer_fgcontrast
 "Define commands {{{2
-command -bar ColorHighlight call s:ColorHighlight(1)
+command -bar -bang ColorHighlight call s:ColorHighlight(1, "<bang>")
 command -bar ColorClear call s:ColorClear()
 command -bar ColorToggle call s:ColorToggle()
 nnoremap <unique> <silent> <Plug>Colorizer :ColorToggle<CR>
