@@ -118,7 +118,7 @@ function s:SetMatcher(color) "{{{2
   if len(color) == 3
     let color = substitute(color, '.', '&&', 'g')
   endif
-  let group = 'Color' . color
+  let group = 'Color' . substitute(a:color,'#','','g')
   if !hlexists(group) || synIDattr(synIDtrans(hlID(group)), "fg") == -1 "Cleared by colorscheme
     let fg = s:colorizer_fgcontrast < 0 ? '#'.color : s:FGforBG(color)
     if &t_Co == 256
