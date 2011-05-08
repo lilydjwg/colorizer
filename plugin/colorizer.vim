@@ -21,6 +21,11 @@
 " If you want completely not to map it, set the following in your vimrc:
 "	let g:colorizer_nomap = 1
 "
+" To use solid color highlight, set this in your vimrc (later change will not
+" take effect):
+"	let g:colorizer_fgcontrast = -1
+" set it to 0 or 1 to use a softened foregroud color.
+"
 " Note: if you modify a color string in normal mode, if the cursor is still on
 " that line, it'll take 'updatetime' seconds to update. You can use
 " :ColorHighlight (or your key mapping) again to force update.
@@ -44,10 +49,11 @@ function s:FGforBG(bg) "{{{2
   let r = eval('0x'.pure[0].pure[1])
   let g = eval('0x'.pure[2].pure[3])
   let b = eval('0x'.pure[4].pure[5])
+  let fgc = s:colorizer_fgcontrast
   if r*30 + g*59 + b*11 > 12000
-    return '#000000'
+    return s:predefined_fgcolors['dark'][fgc]
   else
-    return '#ffffff'
+    return s:predefined_fgcolors['light'][fgc]
   end
 endfunction
 function s:Rgb2xterm(color) "{{{2
@@ -114,7 +120,7 @@ function s:SetMatcher(color) "{{{2
   endif
   let group = 'Color' . color
   if !hlexists(group)
-    let fg = s:FGforBG(color)
+    let fg = s:colorizer_fgcontrast < 0 ? '#'.color : s:FGforBG(color)
     if &t_Co == 256
       exe 'hi '.group.' ctermfg='.s:Rgb2xterm(fg).' ctermbg='.s:Rgb2xterm('#'.color)
     endif
@@ -184,6 +190,20 @@ for c in range(0, 254)
   let color = s:Xterm2rgb(c)
   call add(s:colortable, color)
 endfor
+let s:predefined_fgcolors = {}
+let s:predefined_fgcolors['dark']  = ['#444444', '#222222', '#000000']
+let s:predefined_fgcolors['light'] = ['#bbbbbb', '#dddddd', '#ffffff']
+if !exists("g:colorizer_fgcontrast")
+  " Default to black / white
+  let s:colorizer_fgcontrast = len(s:predefined_fgcolors['dark']) - 1
+elseif g:colorizer_fgcontrast >= len(s:predefined_fgcolors['dark'])
+  echohl WarningMsg
+  echo "g:colorizer_fgcontrast value invalid, using default"
+  echohl None
+  let s:colorizer_fgcontrast = len(s:predefined_fgcolors['dark']) - 1
+else
+  let s:colorizer_fgcontrast = g:colorizer_fgcontrast
+endif
 "Define commands {{{2
 command -bar ColorHighlight call s:ColorHighlight(1)
 command -bar ColorClear call s:ColorClear()
