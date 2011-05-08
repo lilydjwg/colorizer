@@ -157,7 +157,7 @@ function s:ColorHighlight(update) "{{{2
   augroup Colorizer
     au!
     autocmd CursorHold,CursorHoldI,InsertLeave * silent call s:PreviewColorInLine('.')
-    autocmd BufEnter * silent call s:PreviewColorInLine('.')
+    autocmd BufRead * silent call s:ColorHighlight(1)
     autocmd WinEnter * silent call s:ColorHighlight(0)
     autocmd ColorScheme * silent call s:ColorHighlight(1)
   augroup END
