@@ -115,10 +115,10 @@ function s:pow(x, n) "{{{2
 endfunction
 function s:SetMatcher(color) "{{{2
   let color = strpart(a:color, 1)
+  let group = 'Color' . color
   if len(color) == 3
     let color = substitute(color, '.', '&&', 'g')
   endif
-  let group = 'Color' . substitute(a:color,'#','','g')
   if !hlexists(group) || s:force_group_update
     let fg = g:colorizer_fgcontrast < 0 ? '#'.color : s:FGforBG(color)
     if &t_Co == 256
