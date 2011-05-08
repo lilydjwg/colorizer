@@ -127,7 +127,9 @@ function s:SetMatcher(color) "{{{2
     " Always set gui* as user may switch to GUI version and it's cheap
     exe 'hi '.group.' guifg='.fg.' guibg=#'.color
   endif
-  call add(w:colormatches, matchadd(group, a:color.'\>'))
+  if !exists("w:colormatches[group]")
+    let w:colormatches[group] = matchadd(group, a:color.'\>')
+  endif
 endfunction
 function s:PreviewColorInLine(where) "{{{2
   let place = 0
@@ -148,7 +150,7 @@ function s:ColorHighlight(update) "{{{2
     endif
     call s:ColorClear()
   endif
-  let w:colormatches = []
+  let w:colormatches = {}
   for i in range(1, line("$"))
     call s:PreviewColorInLine(i)
   endfor
@@ -171,7 +173,7 @@ function s:ClearMatches() "{{{2
   if !exists('w:colormatches')
     return
   endif
-  for i in w:colormatches
+  for i in values(w:colormatches)
     call matchdelete(i)
   endfor
   unlet w:colormatches
