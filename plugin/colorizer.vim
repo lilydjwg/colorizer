@@ -185,7 +185,7 @@ function s:ClearMatches() "{{{2
   unlet w:colormatches
 endfunction
 function s:ColorToggle() "{{{2
-  if exists('#Colorizer#BufEnter')
+  if exists('#Colorizer#BufRead')
     call s:ColorClear()
     echomsg 'Disabled color code highlighting.'
   else
