@@ -143,6 +143,16 @@ function s:PreviewColorInLine(where) "{{{2
     call s:SetMatcher(foundcolor)
   endwhile
 endfunction
+function s:CursorMoved() "{{{2
+  if exists('b:colorizer_last_update')
+    if b:colorizer_last_update == b:changedtick
+      " Nothing changed
+      return
+    endif
+  endif
+  call s:PreviewColorInLine('.')
+  let b:colorizer_last_update = b:changedtick
+endfunction
 function s:ColorHighlight(update, ...) "{{{2
   if exists('w:colormatches')
     if !a:update
@@ -161,9 +171,8 @@ function s:ColorHighlight(update, ...) "{{{2
   let s:saved_fgcontrast = g:colorizer_fgcontrast
   augroup Colorizer
     au!
-    autocmd CursorHold,CursorHoldI,InsertLeave * silent call s:PreviewColorInLine('.')
+    autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
     autocmd BufRead * silent call s:ColorHighlight(1)
-    autocmd WinEnter * silent call s:ColorHighlight(0)
     autocmd ColorScheme * let s:force_group_update=1 | silent call s:ColorHighlight(1)
   augroup END
 endfunction
