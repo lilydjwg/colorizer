@@ -5,7 +5,8 @@
 " Installation:	This file should reside in the plugin directory.
 " Derived From: css_color.vim
 " 		http://www.vim.org/scripts/script.php?script_id=2150
-" Thanks To:	Niklas Hofer (Author of css_color.vim), Ingo Karkat, rykka
+" Thanks To:	Niklas Hofer (Author of css_color.vim), Ingo Karkat, rykka,
+"		KrzysztofUrban
 " Usage:
 "
 " This plugin defines three commands:
