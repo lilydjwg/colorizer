@@ -145,6 +145,9 @@ function s:PreviewColorInLine(where) "{{{2
   endwhile
 endfunction
 function s:CursorMoved() "{{{2
+  if !exists('w:colormatches')
+    return
+  endif
   if exists('b:colorizer_last_update')
     if b:colorizer_last_update == b:changedtick
       " Nothing changed
@@ -174,6 +177,7 @@ function s:ColorHighlight(update, ...) "{{{2
     au!
     autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
     autocmd BufRead * silent call s:ColorHighlight(1)
+    autocmd WinEnter * silent call s:ColorHighlight(0)
     autocmd ColorScheme * let s:force_group_update=1 | silent call s:ColorHighlight(1)
   augroup END
 endfunction
