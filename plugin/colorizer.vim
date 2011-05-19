@@ -151,37 +151,30 @@ endfunction
 function s:RgbColor(str, lineno) "{{{3
   let ret = []
   let place = 0
-  let colorpat = '\<rgb(\v\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)'
+  let colorpat = '\<rgb(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
     let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
-    if foundcolor[1] > 255 || foundcolor[2] > 255 || foundcolor[3] > 255
+    if foundcolor[2] == '%'
+      let r = foundcolor[1] * 255 / 100
+      let g = foundcolor[3] * 255 / 100
+      let b = foundcolor[4] * 255 / 100
+    else
+      let r = foundcolor[1]
+      let g = foundcolor[3]
+      let b = foundcolor[4]
+    endif
+    if r > 255 || g > 255 || b > 255
       break
     endif
-    let pat = printf('\<rgb(\v\s*%d\s*,\s*%d\s*,\s*%d\s*\)', foundcolor[1], foundcolor[2], foundcolor[3])
-    let color = printf('#%02x%02x%02x', foundcolor[1], foundcolor[2], foundcolor[3])
-    call add(ret, [color, pat])
-  endwhile
-  return ret
-endfunction
-function s:RgbPercentColor(str, lineno) "{{{3
-  let ret = []
-  let place = 0
-  let colorpat = '\<rgb(\v\s*(\d+)\%\s*,\s*(\d+)\%\s*,\s*(\d+)\%\s*\)'
-  while 1
-    let foundcolor = matchlist(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
-    if empty(foundcolor)
-      break
+    let pat = printf('\<rgb(\v\s*%s\s*,\s*%s\s*,\s*%s\s*\)', foundcolor[1], foundcolor[3], foundcolor[4])
+    if foundcolor[2] == '%'
+      let pat = substitute(pat, '%', '\\%', 'g')
     endif
-    if foundcolor[1] > 100 || foundcolor[2] > 100 || foundcolor[3] > 100
-      break
-    endif
-    let pat = printf('\<rgb(\v\s*%d\%%\s*,\s*%d\%%\s*,\s*%d\%%\s*\)', foundcolor[1], foundcolor[2], foundcolor[3])
-    let color = printf('#%02x%02x%02x', foundcolor[1] * 255 / 100, foundcolor[2] * 255 / 100, foundcolor[3] * 255 / 100)
+    let color = printf('#%02x%02x%02x', r, g, b)
     call add(ret, [color, pat])
   endwhile
   return ret
@@ -198,26 +191,38 @@ function s:RgbaColor(str, lineno) "{{{3
   endif
   let ret = []
   let place = 0
-  let colorpat = '\<rgba(\v\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[.[:digit:]]+)\s*\)'
+  let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
     let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
-    if foundcolor[1] > 255 || foundcolor[2] > 255 || foundcolor[3] > 255
+    if foundcolor[2] == '%'
+      let ar = foundcolor[1] * 255 / 100
+      let ag = foundcolor[3] * 255 / 100
+      let ab = foundcolor[4] * 255 / 100
+    else
+      let ar = foundcolor[1]
+      let ag = foundcolor[3]
+      let ab = foundcolor[4]
+    endif
+    if ar > 255 || ag > 255 || ab > 255
       break
     endif
-    let alpha = str2float(foundcolor[4])
+    let alpha = str2float(foundcolor[5])
     if alpha < 0
       let alpha = 0.0
     elseif alpha > 1
       let alpha = 1.0
     endif
-    let pat = printf('\<rgba(\v\s*%d\s*,\s*%d\s*,\s*%d\s*,\s*%s0*\s*\)', foundcolor[1], foundcolor[2], foundcolor[3], foundcolor[4])
-    let r = float2nr(ceil(foundcolor[1] * alpha) + ceil(bg_r * (1 - alpha)))
-    let g = float2nr(ceil(foundcolor[2] * alpha) + ceil(bg_g * (1 - alpha)))
-    let b = float2nr(ceil(foundcolor[3] * alpha) + ceil(bg_b * (1 - alpha)))
+    let pat = printf('\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\s*%s0*\s*\)', foundcolor[1], foundcolor[3], foundcolor[4], foundcolor[5])
+    if foundcolor[2] == '%'
+      let pat = substitute(pat, '%', '\\%', 'g')
+    endif
+    let r = float2nr(ceil(ar * alpha) + ceil(bg_r * (1 - alpha)))
+    let g = float2nr(ceil(ag * alpha) + ceil(bg_g * (1 - alpha)))
+    let b = float2nr(ceil(ab * alpha) + ceil(bg_b * (1 - alpha)))
     if r > 255
       let r = 255
     endif
@@ -235,18 +240,30 @@ endfunction
 function s:RgbaColorForTerm(str, lineno) "{{{3
   let ret = []
   let place = 0
-  let colorpat = '\<rgba(\v\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[.[:digit:]]+)\s*\)'
+  let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
     let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
-    if foundcolor[1] > 255 || foundcolor[2] > 255 || foundcolor[3] > 255
+    if foundcolor[2] == '%'
+      let ar = foundcolor[1] * 255 / 100
+      let ag = foundcolor[3] * 255 / 100
+      let ab = foundcolor[4] * 255 / 100
+    else
+      let ar = foundcolor[1]
+      let ag = foundcolor[3]
+      let ab = foundcolor[4]
+    endif
+    if ar > 255 || ag > 255 || ab > 255
       break
     endif
-    let pat = printf('\<rgba(\v\s*%d\s*,\s*%d\s*,\s*%d\s*,\ze\s*(-?[.[:digit:]]+)\s*\)', foundcolor[1], foundcolor[2], foundcolor[3])
-    let color = printf('#%02x%02x%02x', foundcolor[1], foundcolor[2], foundcolor[3])
+    let pat = printf('\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\ze\s*(-?[.[:digit:]]+)\s*\)', foundcolor[1], foundcolor[3], foundcolor[4])
+    if foundcolor[2] == '%'
+      let pat = substitute(pat, '%', '\\%', 'g')
+    endif
+    let color = printf('#%02x%02x%02x', ar, ag, ab)
     call add(ret, [color, pat])
   endwhile
   return ret
@@ -332,7 +349,7 @@ for c in range(0, 254)
   let color = s:Xterm2rgb(c)
   call add(s:colortable, color)
 endfor
-let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbPercentColor'), function('s:RgbaColor')]
+let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
 let s:predefined_fgcolors['dark']  = ['#444444', '#222222', '#000000']
