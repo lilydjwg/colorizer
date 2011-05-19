@@ -114,35 +114,87 @@ function s:pow(x, n) "{{{2
     return x
   endfor
 endfunction
-function s:SetMatcher(color) "{{{2
-  let color = strpart(a:color, 1)
-  let group = 'Color' . color
-  if len(color) == 3
-    let color = substitute(color, '.', '&&', 'g')
-  endif
+function s:SetMatcher(color, pat) "{{{2
+  " "color" is the converted color and "pat" is what to highlight
+  let group = 'Color' . strpart(a:color, 1)
   if !hlexists(group) || s:force_group_update
-    let fg = g:colorizer_fgcontrast < 0 ? '#'.color : s:FGforBG(color)
+    let fg = g:colorizer_fgcontrast < 0 ? a:color : s:FGforBG(a:color)
     if &t_Co == 256
-      exe 'hi '.group.' ctermfg='.s:Rgb2xterm(fg).' ctermbg='.s:Rgb2xterm('#'.color)
+      exe 'hi '.group.' ctermfg='.s:Rgb2xterm(fg).' ctermbg='.s:Rgb2xterm(a:color)
     endif
     " Always set gui* as user may switch to GUI version and it's cheap
-    exe 'hi '.group.' guifg='.fg.' guibg=#'.color
+    exe 'hi '.group.' guifg='.fg.' guibg='.a:color
   endif
   if !exists("w:colormatches[group]")
-    let w:colormatches[group] = matchadd(group, a:color.'\>')
+    let w:colormatches[group] = matchadd(group, a:pat)
   endif
 endfunction
-function s:PreviewColorInLine(where) "{{{2
+"ColorFinders {{{2
+function s:HexCode(str, lineno) "{{{3
+  let ret = []
   let place = 0
   let colorpat = '#[0-9A-Fa-f]\{3\}\>\|#[0-9A-Fa-f]\{6\}\>'
   while 1
-    let foundcolor = matchstr(getline(a:where), colorpat, place)
-    let place = match(getline(a:where), colorpat, place) + 1
+    let foundcolor = matchstr(a:str, colorpat, place)
+    let place = matchend(a:str, colorpat, place)
     if foundcolor == ''
       break
     endif
-    call s:SetMatcher(foundcolor)
+    let pat = foundcolor . '\>'
+    if len(foundcolor) == 4
+      let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
+    endif
+    call add(ret, [foundcolor, pat])
   endwhile
+  return ret
+endfunction
+function s:RgbColor(str, lineno) "{{{3
+  let ret = []
+  let place = 0
+  let colorpat = '\<rgb(\v\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)'
+  while 1
+    let foundcolor = matchlist(a:str, colorpat, place)
+    let place = matchend(a:str, colorpat, place)
+    if empty(foundcolor)
+      break
+    endif
+    if foundcolor[1] > 255 || foundcolor[2] > 255 || foundcolor[3] > 255
+      break
+    endif
+    let pat = printf('\<rgb(\v\s*%d\s*,\s*%d\s*,\s*%d\s*\)', foundcolor[1], foundcolor[2], foundcolor[3])
+    let color = printf('#%02x%02x%02x', foundcolor[1], foundcolor[2], foundcolor[3])
+    call add(ret, [color, pat])
+  endwhile
+  return ret
+endfunction
+function s:RgbPercentColor(str, lineno) "{{{3
+  let ret = []
+  let place = 0
+  let colorpat = '\<rgb(\v\s*(\d+)\%\s*,\s*(\d+)\%\s*,\s*(\d+)\%\s*\)'
+  while 1
+    let foundcolor = matchlist(a:str, colorpat, place)
+    let place = matchend(a:str, colorpat, place)
+    if empty(foundcolor)
+      break
+    endif
+    if foundcolor[1] > 100 || foundcolor[2] > 100 || foundcolor[3] > 100
+      break
+    endif
+    let pat = printf('\<rgb(\v\s*%d\%%\s*,\s*%d\%%\s*,\s*%d\%%\s*\)', foundcolor[1], foundcolor[2], foundcolor[3])
+    let color = printf('#%02x%02x%02x', foundcolor[1] * 255 / 100, foundcolor[2] * 255 / 100, foundcolor[3] * 255 / 100)
+    call add(ret, [color, pat])
+  endwhile
+  return ret
+endfunction
+function s:PreviewColorInLine(where) "{{{2
+  let line = getline(a:where)
+  for Func in s:ColorFinder
+    let ret = Func(line, a:where)
+    " returned a list of a list: color as #rrggbb, text pattern to highlight
+    for r in ret
+      call s:SetMatcher(r[0], r[1])
+    endfor
+  endfor
 endfunction
 function s:CursorMoved() "{{{2
   if !exists('w:colormatches')
@@ -207,11 +259,12 @@ function s:ColorToggle() "{{{2
     echomsg 'Enabled color code highlighting.'
   endif
 endfunction
-let s:colortable=[] "{{{2
+let s:colortable=[] "setups {{{2
 for c in range(0, 254)
   let color = s:Xterm2rgb(c)
   call add(s:colortable, color)
 endfor
+let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbPercentColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
 let s:predefined_fgcolors['dark']  = ['#444444', '#222222', '#000000']
