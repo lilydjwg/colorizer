@@ -125,8 +125,8 @@ function s:SetMatcher(color, pat) "{{{2
     " Always set gui* as user may switch to GUI version and it's cheap
     exe 'hi '.group.' guifg='.fg.' guibg='.a:color
   endif
-  if !exists("w:colormatches[group]")
-    let w:colormatches[group] = matchadd(group, a:pat)
+  if !exists("w:colormatches[a:pat]")
+    let w:colormatches[a:pat] = matchadd(group, a:pat)
   endif
 endfunction
 "ColorFinders {{{2
