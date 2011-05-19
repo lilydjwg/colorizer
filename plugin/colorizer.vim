@@ -186,6 +186,71 @@ function s:RgbPercentColor(str, lineno) "{{{3
   endwhile
   return ret
 endfunction
+function s:RgbaColor(str, lineno) "{{{3
+  if has("gui_running")
+    let bg = synIDattr(synIDtrans(hlID("Normal")), "bg")
+    let bg_r = str2nr(bg[1].bg[2], 16)
+    let bg_g = str2nr(bg[3].bg[4], 16)
+    let bg_b = str2nr(bg[5].bg[6], 16)
+  else
+    " translucent colors would display incorrectly, so ignore the alpha value
+    return s:RgbaColorForTerm(a:str, a:lineno)
+  endif
+  let ret = []
+  let place = 0
+  let colorpat = '\<rgba(\v\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[.[:digit:]]+)\s*\)'
+  while 1
+    let foundcolor = matchlist(a:str, colorpat, place)
+    let place = matchend(a:str, colorpat, place)
+    if empty(foundcolor)
+      break
+    endif
+    if foundcolor[1] > 255 || foundcolor[2] > 255 || foundcolor[3] > 255
+      break
+    endif
+    let alpha = str2float(foundcolor[4])
+    if alpha < 0
+      let alpha = 0.0
+    elseif alpha > 1
+      let alpha = 1.0
+    endif
+    let pat = printf('\<rgba(\v\s*%d\s*,\s*%d\s*,\s*%d\s*,\s*%s0*\s*\)', foundcolor[1], foundcolor[2], foundcolor[3], foundcolor[4])
+    let r = float2nr(ceil(foundcolor[1] * alpha) + ceil(bg_r * (1 - alpha)))
+    let g = float2nr(ceil(foundcolor[2] * alpha) + ceil(bg_g * (1 - alpha)))
+    let b = float2nr(ceil(foundcolor[3] * alpha) + ceil(bg_b * (1 - alpha)))
+    if r > 255
+      let r = 255
+    endif
+    if g > 255
+      let g = 255
+    endif
+    if b > 255
+      let b = 255
+    endif
+    let color = printf('#%02x%02x%02x', r, g, b)
+    call add(ret, [color, pat])
+  endwhile
+  return ret
+endfunction
+function s:RgbaColorForTerm(str, lineno) "{{{3
+  let ret = []
+  let place = 0
+  let colorpat = '\<rgba(\v\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[.[:digit:]]+)\s*\)'
+  while 1
+    let foundcolor = matchlist(a:str, colorpat, place)
+    let place = matchend(a:str, colorpat, place)
+    if empty(foundcolor)
+      break
+    endif
+    if foundcolor[1] > 255 || foundcolor[2] > 255 || foundcolor[3] > 255
+      break
+    endif
+    let pat = printf('\<rgba(\v\s*%d\s*,\s*%d\s*,\s*%d\s*,\ze\s*(-?[.[:digit:]]+)\s*\)', foundcolor[1], foundcolor[2], foundcolor[3])
+    let color = printf('#%02x%02x%02x', foundcolor[1], foundcolor[2], foundcolor[3])
+    call add(ret, [color, pat])
+  endwhile
+  return ret
+endfunction
 function s:PreviewColorInLine(where) "{{{2
   let line = getline(a:where)
   for Func in s:ColorFinder
@@ -228,6 +293,8 @@ function s:ColorHighlight(update, ...) "{{{2
   augroup Colorizer
     au!
     autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
+    " rgba handles differently, so need updating
+    autocmd GUIEnter * silent call s:ColorHighlight(1)
     autocmd BufRead * silent call s:ColorHighlight(1)
     autocmd WinEnter * silent call s:ColorHighlight(0)
     autocmd ColorScheme * let s:force_group_update=1 | silent call s:ColorHighlight(1)
@@ -259,12 +326,13 @@ function s:ColorToggle() "{{{2
     echomsg 'Enabled color code highlighting.'
   endif
 endfunction
-let s:colortable=[] "setups {{{2
+" Setups {{{2
+let s:colortable = []
 for c in range(0, 254)
   let color = s:Xterm2rgb(c)
   call add(s:colortable, color)
 endfor
-let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbPercentColor')]
+let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbPercentColor'), function('s:RgbaColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
 let s:predefined_fgcolors['dark']  = ['#444444', '#222222', '#000000']
