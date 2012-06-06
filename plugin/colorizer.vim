@@ -92,10 +92,10 @@ function s:Xterm2rgb(color) "{{{2
 
   " color cube color
   if a:color>=16 && a:color<=232
-    let color=a:color-16
-    let r = s:valuerange[(color/36)%6]
-    let g = s:valuerange[(color/6)%6]
-    let b = s:valuerange[color%6]
+    let l:color=a:color-16
+    let r = s:valuerange[(l:color/36)%6]
+    let g = s:valuerange[(l:color/6)%6]
+    let b = s:valuerange[l:color%6]
   endif
 
   " gray tone
@@ -174,8 +174,8 @@ function s:RgbColor(str, lineno) "{{{3
     if foundcolor[2] == '%'
       let pat = substitute(pat, '%', '\\%', 'g')
     endif
-    let color = printf('#%02x%02x%02x', r, g, b)
-    call add(ret, [color, pat])
+    let l:color = printf('#%02x%02x%02x', r, g, b)
+    call add(ret, [l:color, pat])
   endwhile
   return ret
 endfunction
@@ -232,8 +232,8 @@ function s:RgbaColor(str, lineno) "{{{3
     if b > 255
       let b = 255
     endif
-    let color = printf('#%02x%02x%02x', r, g, b)
-    call add(ret, [color, pat])
+    let l:color = printf('#%02x%02x%02x', r, g, b)
+    call add(ret, [l:color, pat])
   endwhile
   return ret
 endfunction
@@ -263,8 +263,8 @@ function s:RgbaColorForTerm(str, lineno) "{{{3
     if foundcolor[2] == '%'
       let pat = substitute(pat, '%', '\\%', 'g')
     endif
-    let color = printf('#%02x%02x%02x', ar, ag, ab)
-    call add(ret, [color, pat])
+    let l:color = printf('#%02x%02x%02x', ar, ag, ab)
+    call add(ret, [l:color, pat])
   endwhile
   return ret
 endfunction
@@ -346,8 +346,8 @@ endfunction
 " Setups {{{2
 let s:colortable = []
 for c in range(0, 254)
-  let color = s:Xterm2rgb(c)
-  call add(s:colortable, color)
+  let s:color = s:Xterm2rgb(c)
+  call add(s:colortable, s:color)
 endfor
 let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor')]
 let s:force_group_update = 0
