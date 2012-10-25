@@ -321,9 +321,11 @@ function s:ColorClear() "{{{2
   augroup Colorizer
     au!
   augroup END
-  let savepos = tabpagenr()
+  let save_tab = tabpagenr()
+  let save_win = winnr()
   tabdo windo call s:ClearMatches()
-  exe 'tabn '.savepos
+  exe 'tabn '.save_tab
+  exe save_win . 'wincmd w'
 endfunction
 function s:ClearMatches() "{{{2
   if !exists('w:colormatches')
