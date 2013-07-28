@@ -27,8 +27,8 @@
 "	let g:colorizer_fgcontrast = -1
 " set it to 0 or 1 to use a softened foregroud color.
 "
-" If you want to enable colorizer at startup, set the following:
-"	let g:colorizer_startup = 1
+" If you don't want to enable colorizer at startup, set the following:
+"	let g:colorizer_startup = 0
 "
 " Note: if you modify a color string in normal mode, if the cursor is still on
 " that line, it'll take 'updatetime' seconds to update. You can use
@@ -369,7 +369,7 @@ elseif g:colorizer_fgcontrast >= len(s:predefined_fgcolors['dark'])
   let g:colorizer_fgcontrast = len(s:predefined_fgcolors['dark']) - 1
 endif
 let s:saved_fgcontrast = g:colorizer_fgcontrast
-if exists('g:colorizer_startup') && g:colorizer_startup
+if !exists('g:colorizer_startup') || g:colorizer_startup
   call s:ColorToggle()
 endif
 "Define commands {{{2
