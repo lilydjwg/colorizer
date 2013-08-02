@@ -299,7 +299,7 @@ function s:ColorHighlight(update, ...) "{{{2
     if !a:update
       return
     endif
-    call s:ColorClear()
+    call s:ClearMatches()
   endif
   let w:colormatches = {}
   if g:colorizer_fgcontrast != s:saved_fgcontrast || (exists("a:1") && a:1 == '!')
@@ -316,7 +316,7 @@ function s:ColorHighlight(update, ...) "{{{2
     " rgba handles differently, so need updating
     autocmd GUIEnter * silent call s:ColorHighlight(1)
     autocmd BufRead * silent call s:ColorHighlight(1)
-    autocmd WinEnter * silent call s:ColorHighlight(0)
+    autocmd WinEnter * silent call s:ColorHighlight(1)
     autocmd ColorScheme * let s:force_group_update=1 | silent call s:ColorHighlight(1)
   augroup END
 endfunction
