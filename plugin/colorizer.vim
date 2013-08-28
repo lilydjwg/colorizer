@@ -370,7 +370,7 @@ elseif g:colorizer_fgcontrast >= len(s:predefined_fgcolors['dark'])
 endif
 let s:saved_fgcontrast = g:colorizer_fgcontrast
 if !exists('g:colorizer_startup') || g:colorizer_startup
-  call s:ColorToggle()
+  call s:ColorHighlight(0)
 endif
 "Define commands {{{2
 command -bar -bang ColorHighlight call s:ColorHighlight(1, "<bang>")
