@@ -67,8 +67,9 @@ function s:Rgb2xterm(color) "{{{2
   let r = eval('0x'.a:color[1].a:color[2])
   let g = eval('0x'.a:color[3].a:color[4])
   let b = eval('0x'.a:color[5].a:color[6])
+  let colortable = s:GetXterm2rgbTable()
   for c in range(0,254)
-    let d = s:pow(s:colortable[c][0]-r,2) + s:pow(s:colortable[c][1]-g,2) + s:pow(s:colortable[c][2]-b,2)
+    let d = pow(colortable[c][0]-r,2) + pow(colortable[c][1]-g,2) + pow(colortable[c][2]-b,2)
     if d<smallest_distance
       let smallest_distance = d
       let best_match = c
@@ -110,13 +111,6 @@ function s:Xterm2rgb(color) "{{{2
   let rgb=[r,g,b]
   return rgb
 endfunction
-function s:pow(x, n) "{{{2
-  let x = a:x
-  for i in range(a:n-1)
-    let x = x*a:x
-    return x
-  endfor
-endfunction
 function s:SetMatcher(color, pat) "{{{2
   " "color" is the converted color and "pat" is what to highlight
   let group = 'Color' . strpart(a:color, 1)
@@ -139,10 +133,10 @@ function s:HexCode(str, lineno) "{{{3
   let colorpat = '#[0-9A-Fa-f]\{3\}\>\|#[0-9A-Fa-f]\{6\}\>'
   while 1
     let foundcolor = matchstr(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if foundcolor == ''
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     let pat = foundcolor . '\>'
     if len(foundcolor) == 4
       let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
@@ -157,10 +151,10 @@ function s:RgbColor(str, lineno) "{{{3
   let colorpat = '\<rgb(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     if foundcolor[2] == '%'
       let r = foundcolor[1] * 255 / 100
       let g = foundcolor[3] * 255 / 100
@@ -197,10 +191,10 @@ function s:RgbaColor(str, lineno) "{{{3
   let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     if foundcolor[2] == '%'
       let ar = foundcolor[1] * 255 / 100
       let ag = foundcolor[3] * 255 / 100
@@ -246,10 +240,10 @@ function s:RgbaColorForTerm(str, lineno) "{{{3
   let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     if foundcolor[2] == '%'
       let ar = foundcolor[1] * 255 / 100
       let ag = foundcolor[3] * 255 / 100
@@ -348,12 +342,17 @@ function s:ColorToggle() "{{{2
     echomsg 'Enabled color code highlighting.'
   endif
 endfunction
+fun! s:GetXterm2rgbTable()
+  if !exists('s:table_xterm2rgb')
+    let s:table_xterm2rgb = []
+    for c in range(0, 254)
+      let s:color = s:Xterm2rgb(c)
+      call add(s:table_xterm2rgb, s:color)
+    endfor
+  endif
+  return s:table_xterm2rgb
+endfun
 " Setups {{{2
-let s:colortable = []
-for c in range(0, 254)
-  let s:color = s:Xterm2rgb(c)
-  call add(s:colortable, s:color)
-endfor
 let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
