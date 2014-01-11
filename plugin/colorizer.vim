@@ -133,10 +133,10 @@ function s:HexCode(str, lineno) "{{{3
   let colorpat = '#[0-9A-Fa-f]\{3\}\>\|#[0-9A-Fa-f]\{6\}\>'
   while 1
     let foundcolor = matchstr(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if foundcolor == ''
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     let pat = foundcolor . '\>'
     if len(foundcolor) == 4
       let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
@@ -151,10 +151,10 @@ function s:RgbColor(str, lineno) "{{{3
   let colorpat = '\<rgb(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     if foundcolor[2] == '%'
       let r = foundcolor[1] * 255 / 100
       let g = foundcolor[3] * 255 / 100
@@ -191,10 +191,10 @@ function s:RgbaColor(str, lineno) "{{{3
   let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     if foundcolor[2] == '%'
       let ar = foundcolor[1] * 255 / 100
       let ag = foundcolor[3] * 255 / 100
@@ -240,10 +240,10 @@ function s:RgbaColorForTerm(str, lineno) "{{{3
   let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
-    let place = matchend(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
+    let place = matchend(a:str, colorpat, place)
     if foundcolor[2] == '%'
       let ar = foundcolor[1] * 255 / 100
       let ag = foundcolor[3] * 255 / 100
