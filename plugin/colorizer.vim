@@ -69,7 +69,7 @@ function s:Rgb2xterm(color) "{{{2
   let b = eval('0x'.a:color[5].a:color[6])
   let colortable = s:GetXterm2rgbTable()
   for c in range(0,254)
-    let d = s:pow(colortable[c][0]-r,2) + s:pow(colortable[c][1]-g,2) + s:pow(colortable[c][2]-b,2)
+    let d = pow(colortable[c][0]-r,2) + pow(colortable[c][1]-g,2) + pow(colortable[c][2]-b,2)
     if d<smallest_distance
       let smallest_distance = d
       let best_match = c
@@ -110,13 +110,6 @@ function s:Xterm2rgb(color) "{{{2
   endif
   let rgb=[r,g,b]
   return rgb
-endfunction
-function s:pow(x, n) "{{{2
-  let x = a:x
-  for i in range(a:n-1)
-    let x = x*a:x
-    return x
-  endfor
 endfunction
 function s:SetMatcher(color, pat) "{{{2
   " "color" is the converted color and "pat" is what to highlight
