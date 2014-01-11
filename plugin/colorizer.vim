@@ -67,8 +67,9 @@ function s:Rgb2xterm(color) "{{{2
   let r = eval('0x'.a:color[1].a:color[2])
   let g = eval('0x'.a:color[3].a:color[4])
   let b = eval('0x'.a:color[5].a:color[6])
+  let colortable = s:GetXterm2rgbTable()
   for c in range(0,254)
-    let d = s:pow(s:colortable[c][0]-r,2) + s:pow(s:colortable[c][1]-g,2) + s:pow(s:colortable[c][2]-b,2)
+    let d = s:pow(colortable[c][0]-r,2) + s:pow(colortable[c][1]-g,2) + s:pow(colortable[c][2]-b,2)
     if d<smallest_distance
       let smallest_distance = d
       let best_match = c
@@ -348,12 +349,17 @@ function s:ColorToggle() "{{{2
     echomsg 'Enabled color code highlighting.'
   endif
 endfunction
+fun! s:GetXterm2rgbTable()
+  if !exists('s:table_xterm2rgb')
+    let s:table_xterm2rgb = []
+    for c in range(0, 254)
+      let s:color = s:Xterm2rgb(c)
+      call add(s:table_xterm2rgb, s:color)
+    endfor
+  endif
+  return s:table_xterm2rgb
+endfun
 " Setups {{{2
-let s:colortable = []
-for c in range(0, 254)
-  let s:color = s:Xterm2rgb(c)
-  call add(s:colortable, s:color)
-endfor
 let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
