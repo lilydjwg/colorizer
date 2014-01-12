@@ -47,7 +47,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 " main part {{{1
-function s:FGforBG(bg) "{{{2
+function! s:FGforBG(bg) "{{{2
   " takes a 6hex color code and returns a matching color that is visible
   let pure = substitute(a:bg,'^#','','')
   let r = eval('0x'.pure[0].pure[1])
@@ -60,7 +60,7 @@ function s:FGforBG(bg) "{{{2
     return s:predefined_fgcolors['light'][fgc]
   end
 endfunction
-function s:Rgb2xterm(color) "{{{2
+function! s:Rgb2xterm(color) "{{{2
   " selects the nearest xterm color for a rgb value like #FF0000
   let best_match=0
   let smallest_distance = 10000000000
@@ -82,7 +82,7 @@ let s:valuerange = [0x00, 0x5F, 0x87, 0xAF, 0xD7, 0xFF]
 "" 16 basic colors {{{2
 let s:basic16 = [[0x00, 0x00, 0x00], [0xCD, 0x00, 0x00], [0x00, 0xCD, 0x00], [0xCD, 0xCD, 0x00], [0x00, 0x00, 0xEE], [0xCD, 0x00, 0xCD], [0x00, 0xCD, 0xCD], [0xE5, 0xE5, 0xE5], [ 0x7F, 0x7F, 0x7F ], [ 0xFF, 0x00, 0x00 ], [ 0x00, 0xFF, 0x00 ], [ 0xFF, 0xFF, 0x00 ], [ 0x5C, 0x5C, 0xFF ], [ 0xFF, 0x00, 0xFF ], [ 0x00, 0xFF, 0xFF ], [0xFF, 0xFF, 0xFF]]
 
-function s:Xterm2rgb(color) "{{{2
+function! s:Xterm2rgb(color) "{{{2
   " 16 basic colors
   let r = 0
   let g = 0
@@ -110,14 +110,14 @@ function s:Xterm2rgb(color) "{{{2
   let rgb=[r,g,b]
   return rgb
 endfunction
-function s:pow(x, n) "{{{2
+function! s:pow(x, n) "{{{2
   let x = a:x
   for i in range(a:n-1)
     let x = x*a:x
     return x
   endfor
 endfunction
-function s:SetMatcher(color, pat) "{{{2
+function! s:SetMatcher(color, pat) "{{{2
   " "color" is the converted color and "pat" is what to highlight
   let group = 'Color' . strpart(a:color, 1)
   if !hlexists(group) || s:force_group_update
@@ -133,7 +133,7 @@ function s:SetMatcher(color, pat) "{{{2
   endif
 endfunction
 "ColorFinders {{{2
-function s:HexCode(str, lineno) "{{{3
+function! s:HexCode(str, lineno) "{{{3
   let ret = []
   let place = 0
   let colorpat = '#[0-9A-Fa-f]\{3\}\>\|#[0-9A-Fa-f]\{6\}\>'
@@ -151,7 +151,7 @@ function s:HexCode(str, lineno) "{{{3
   endwhile
   return ret
 endfunction
-function s:RgbColor(str, lineno) "{{{3
+function! s:RgbColor(str, lineno) "{{{3
   let ret = []
   let place = 0
   let colorpat = '\<rgb(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*\)'
@@ -182,7 +182,7 @@ function s:RgbColor(str, lineno) "{{{3
   endwhile
   return ret
 endfunction
-function s:RgbaColor(str, lineno) "{{{3
+function! s:RgbaColor(str, lineno) "{{{3
   if has("gui_running")
     let bg = synIDattr(synIDtrans(hlID("Normal")), "bg")
     let bg_r = str2nr(bg[1].bg[2], 16)
@@ -240,7 +240,7 @@ function s:RgbaColor(str, lineno) "{{{3
   endwhile
   return ret
 endfunction
-function s:RgbaColorForTerm(str, lineno) "{{{3
+function! s:RgbaColorForTerm(str, lineno) "{{{3
   let ret = []
   let place = 0
   let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
@@ -271,7 +271,7 @@ function s:RgbaColorForTerm(str, lineno) "{{{3
   endwhile
   return ret
 endfunction
-function s:PreviewColorInLine(where) "{{{2
+function! s:PreviewColorInLine(where) "{{{2
   let line = getline(a:where)
   for Func in s:ColorFinder
     let ret = Func(line, a:where)
@@ -281,7 +281,7 @@ function s:PreviewColorInLine(where) "{{{2
     endfor
   endfor
 endfunction
-function s:CursorMoved() "{{{2
+function! s:CursorMoved() "{{{2
   if !exists('w:colormatches')
     return
   endif
@@ -294,7 +294,7 @@ function s:CursorMoved() "{{{2
   call s:PreviewColorInLine('.')
   let b:colorizer_last_update = b:changedtick
 endfunction
-function s:ColorHighlight(update, ...) "{{{2
+function! s:ColorHighlight(update, ...) "{{{2
   if exists('w:colormatches')
     if !a:update
       return
@@ -320,7 +320,7 @@ function s:ColorHighlight(update, ...) "{{{2
     autocmd ColorScheme * let s:force_group_update=1 | silent call s:ColorHighlight(1)
   augroup END
 endfunction
-function s:ColorClear() "{{{2
+function! s:ColorClear() "{{{2
   augroup Colorizer
     au!
   augroup END
@@ -330,7 +330,7 @@ function s:ColorClear() "{{{2
   exe 'tabn '.save_tab
   exe save_win . 'wincmd w'
 endfunction
-function s:ClearMatches() "{{{2
+function! s:ClearMatches() "{{{2
   if !exists('w:colormatches')
     return
   endif
@@ -339,7 +339,7 @@ function s:ClearMatches() "{{{2
   endfor
   unlet w:colormatches
 endfunction
-function s:ColorToggle() "{{{2
+function! s:ColorToggle() "{{{2
   if exists('#Colorizer#BufRead')
     call s:ColorClear()
     echomsg 'Disabled color code highlighting.'
@@ -373,10 +373,10 @@ if !exists('g:colorizer_startup') || g:colorizer_startup
   call s:ColorHighlight(0)
 endif
 "Define commands {{{2
-command -bar -bang ColorHighlight call s:ColorHighlight(1, "<bang>")
-command -bar ColorClear call s:ColorClear()
-command -bar ColorToggle call s:ColorToggle()
-nnoremap <unique> <silent> <Plug>Colorizer :ColorToggle<CR>
+command! -bar -bang ColorHighlight call s:ColorHighlight(1, "<bang>")
+command! -bar ColorClear call s:ColorClear()
+command! -bar ColorToggle call s:ColorToggle()
+nnoremap <silent> <Plug>Colorizer :ColorToggle<CR>
 if !hasmapto("<Plug>Colorizer") && (!exists("g:colorizer_nomap") || g:colorizer_nomap == 0)
   nmap <unique> <Leader>tc <Plug>Colorizer
 endif
