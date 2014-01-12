@@ -264,6 +264,14 @@ function! s:CursorMoved() "{{{1
   let b:colorizer_last_update = b:changedtick
 endfunction
 
+function! s:TextChanged() "{{{1
+  if !exists('w:colormatches')
+    return
+  endif
+  echomsg "TextChanged"
+  call s:PreviewColorInLine('.')
+endfunction
+
 function! colorizer#ColorHighlight(update, ...) "{{{1
   if exists('w:colormatches')
     if !a:update
@@ -282,7 +290,13 @@ function! colorizer#ColorHighlight(update, ...) "{{{1
   let s:saved_fgcontrast = g:colorizer_fgcontrast
   augroup Colorizer
     au!
-    autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
+    if exists('##TextChanged')
+      autocmd TextChanged * silent call s:TextChanged()
+      " TextChangedI does not work as expected
+      autocmd CursorMovedI * silent call s:CursorMoved()
+    else
+      autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
+    endif
     " rgba handles differently, so need updating
     autocmd GUIEnter * silent call colorizer#ColorHighlight(1)
     autocmd BufRead * silent call colorizer#ColorHighlight(1)
