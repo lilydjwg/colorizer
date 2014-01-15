@@ -6,7 +6,7 @@ all:
 	@echo "Available phony targets: install, uninstall"
 
 install:
-	for f in $(FILES); do install $$f $(DOTVIM)/$$f; done
+	for f in $(FILES); do install -m644 $$f $(DOTVIM)/$$f; done
 
 uninstall:
 	rm -f $(FILES)
