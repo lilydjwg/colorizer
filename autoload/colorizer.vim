@@ -292,8 +292,12 @@ function! colorizer#ColorHighlight(update, ...) "{{{1
     au!
     if exists('##TextChanged')
       autocmd TextChanged * silent call s:TextChanged()
-      " TextChangedI does not work as expected
-      autocmd CursorMovedI * silent call s:CursorMoved()
+      if v:version > 704 || v:version == 704 && has('patch143')
+        autocmd TextChangedI * silent call s:TextChanged()
+      else
+        " TextChangedI does not work as expected
+        autocmd CursorMovedI * silent call s:CursorMoved()
+      endif
     else
       autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
     endif
