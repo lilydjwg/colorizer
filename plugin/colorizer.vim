@@ -53,6 +53,9 @@ nnoremap <silent> <Plug>Colorizer :ColorToggle<CR>
 if !hasmapto("<Plug>Colorizer") && (!exists("g:colorizer_nomap") || g:colorizer_nomap == 0)
   nmap <unique> <Leader>tc <Plug>Colorizer
 endif
+if !exists('g:colorizer_startup') || g:colorizer_startup
+  call colorizer#ColorHighlight(0)
+endif
 
 " Cleanup and modelines {{{1
 let &cpo = s:save_cpo
