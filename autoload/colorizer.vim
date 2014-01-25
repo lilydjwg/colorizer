@@ -1,6 +1,6 @@
 " colorizer.vim	Colorize all text in the form #rrggbb or #rgb; autoload functions
 " Maintainer:	lilydjwg <lilydjwg@gmail.com>
-" Version:	1.4
+" Version:	1.4.1
 " License:	Vim License  (see vim's :help license)
 "
 " See plugin/colorizer.vim for more info.

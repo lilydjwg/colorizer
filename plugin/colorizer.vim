@@ -1,11 +1,11 @@
 " colorizer.vim	Colorize all text in the form #rrggbb or #rgb; entrance
 " Maintainer:	lilydjwg <lilydjwg@gmail.com>
-" Version:	1.4
+" Version:	1.4.1
 " Licence:	Vim license. See ':help license'
 " Derived From: css_color.vim
 " 		http://www.vim.org/scripts/script.php?script_id=2150
 " Thanks To:	Niklas Hofer (Author of css_color.vim), Ingo Karkat, rykka,
-"		KrzysztofUrban, blueyed
+"		KrzysztofUrban, blueyed, shanesmith
 " Usage:
 "
 " This plugin defines three commands:
