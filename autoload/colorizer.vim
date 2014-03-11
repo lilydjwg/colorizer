@@ -11,9 +11,9 @@ set cpo&vim
 function! s:FGforBG(bg) "{{{1
   " takes a 6hex color code and returns a matching color that is visible
   let pure = substitute(a:bg,'^#','','')
-  let r = eval('0x'.pure[0].pure[1])
-  let g = eval('0x'.pure[2].pure[3])
-  let b = eval('0x'.pure[4].pure[5])
+  let r = str2nr(pure[0:1], 16)
+  let g = str2nr(pure[2:3], 16)
+  let b = str2nr(pure[4:5], 16)
   let fgc = g:colorizer_fgcontrast
   if r*30 + g*59 + b*11 > 12000
     return s:predefined_fgcolors['dark'][fgc]
@@ -26,9 +26,9 @@ function! s:Rgb2xterm(color) "{{{1
   " selects the nearest xterm color for a rgb value like #FF0000
   let best_match=0
   let smallest_distance = 10000000000
-  let r = eval('0x'.a:color[1].a:color[2])
-  let g = eval('0x'.a:color[3].a:color[4])
-  let b = eval('0x'.a:color[5].a:color[6])
+  let r = str2nr(a:color[0:1], 16)
+  let g = str2nr(a:color[2:3], 16)
+  let b = str2nr(a:color[4:5], 16)
   let colortable = s:GetXterm2rgbTable()
   for c in range(0,254)
     let d = pow(colortable[c][0]-r,2) + pow(colortable[c][1]-g,2) + pow(colortable[c][2]-b,2)
