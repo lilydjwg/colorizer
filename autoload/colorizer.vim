@@ -291,25 +291,6 @@ function! colorizer#ColorHighlight(update, ...) "{{{1
   endfor
   let s:force_group_update = 0
   let s:saved_fgcontrast = g:colorizer_fgcontrast
-  augroup Colorizer
-    au!
-    if exists('##TextChanged')
-      autocmd TextChanged * silent call s:TextChanged()
-      if v:version > 704 || v:version == 704 && has('patch143')
-        autocmd TextChangedI * silent call s:TextChanged()
-      else
-        " TextChangedI does not work as expected
-        autocmd CursorMovedI * silent call s:CursorMoved()
-      endif
-    else
-      autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
-    endif
-    " rgba handles differently, so need updating
-    autocmd GUIEnter * silent call colorizer#ColorHighlight(1)
-    autocmd BufRead * silent call colorizer#ColorHighlight(1)
-    autocmd WinEnter * silent call colorizer#ColorHighlight(1)
-    autocmd ColorScheme * let s:force_group_update=1 | silent call colorizer#ColorHighlight(1)
-  augroup END
 endfunction
 
 function! colorizer#ColorClear() "{{{1
@@ -374,4 +355,23 @@ let s:saved_fgcontrast = g:colorizer_fgcontrast
 " Restoration and modelines {{{1
 let &cpo = s:keepcpo
 unlet s:keepcpo
+augroup Colorizer
+    au!
+    if exists('##TextChanged')
+        autocmd TextChanged * silent call s:TextChanged()
+        if v:version > 704 || v:version == 704 && has('patch143')
+            autocmd TextChangedI * silent call s:TextChanged()
+        else
+            " TextChangedI does not work as expected
+            autocmd CursorMovedI * silent call s:CursorMoved()
+        endif
+    else
+        autocmd CursorMoved,CursorMovedI * silent call s:CursorMoved()
+    endif
+    " rgba handles differently, so need updating
+    autocmd GUIEnter * silent call colorizer#ColorHighlight(1)
+    autocmd BufRead * silent call colorizer#ColorHighlight(1)
+    autocmd WinEnter * silent call colorizer#ColorHighlight(1)
+    autocmd ColorScheme * let s:force_group_update=1 | silent call colorizer#ColorHighlight(1)
+augroup END
 " vim:ft=vim:fdm=marker:fmr={{{,}}}:
