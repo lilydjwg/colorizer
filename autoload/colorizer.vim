@@ -154,9 +154,9 @@ endfunction
 function! s:RgbaColor(str, lineno) "{{{2
   if has("gui_running")
     let bg = synIDattr(synIDtrans(hlID("Normal")), "bg")
-    let bg_r = str2nr(bg[1].bg[2], 16)
-    let bg_g = str2nr(bg[3].bg[4], 16)
-    let bg_b = str2nr(bg[5].bg[6], 16)
+    let bg_r = str2nr(bg[1:2], 16)
+    let bg_g = str2nr(bg[3:4], 16)
+    let bg_b = str2nr(bg[5:6], 16)
   else
     " translucent colors would display incorrectly, so ignore the alpha value
     return s:RgbaColorForTerm(a:str, a:lineno)
@@ -195,15 +195,9 @@ function! s:RgbaColor(str, lineno) "{{{2
     let r = float2nr(ceil(ar * alpha) + ceil(bg_r * (1 - alpha)))
     let g = float2nr(ceil(ag * alpha) + ceil(bg_g * (1 - alpha)))
     let b = float2nr(ceil(ab * alpha) + ceil(bg_b * (1 - alpha)))
-    if r > 255
-      let r = 255
-    endif
-    if g > 255
-      let g = 255
-    endif
-    if b > 255
-      let b = 255
-    endif
+    let r = min([r, 255])
+    let g = min([g, 255])
+    let b = min([b, 255])
     let l:color = printf('#%02x%02x%02x', r, g, b)
     call add(ret, [l:color, pat])
   endwhile
