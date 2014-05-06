@@ -26,9 +26,9 @@ function! s:Rgb2xterm(color) "{{{1
   " selects the nearest xterm color for a rgb value like #FF0000
   let best_match=0
   let smallest_distance = 10000000000
-  let r = str2nr(a:color[0:1], 16)
-  let g = str2nr(a:color[2:3], 16)
-  let b = str2nr(a:color[4:5], 16)
+  let r = str2nr(a:color[1:2], 16)
+  let g = str2nr(a:color[3:4], 16)
+  let b = str2nr(a:color[5:6], 16)
   let colortable = s:GetXterm2rgbTable()
   for c in range(0,254)
     let d = pow(colortable[c][0]-r,2) + pow(colortable[c][1]-g,2) + pow(colortable[c][2]-b,2)
