@@ -328,7 +328,11 @@ function! s:ClearMatches() "{{{1
     return
   endif
   for i in values(w:colormatches)
-    call matchdelete(i)
+    try
+      call matchdelete(i)
+    catch /.*/
+      " matches have been cleared in other ways, e.g. user has called clearmatches()
+    endtry
   endfor
   unlet w:colormatches
 endfunction
