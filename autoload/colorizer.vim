@@ -306,7 +306,7 @@ function! colorizer#ColorHighlight(update, ...) "{{{1
     endif
     " rgba handles differently, so need updating
     autocmd GUIEnter * silent call colorizer#ColorHighlight(1)
-    autocmd BufRead * silent call colorizer#ColorHighlight(1)
+    autocmd BufEnter * silent call colorizer#ColorHighlight(1)
     autocmd WinEnter * silent call colorizer#ColorHighlight(1)
     autocmd ColorScheme * let s:force_group_update=1 | silent call colorizer#ColorHighlight(1)
   augroup END
