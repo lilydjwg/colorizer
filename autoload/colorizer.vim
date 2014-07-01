@@ -316,6 +316,7 @@ function! colorizer#ColorClear() "{{{1
   augroup Colorizer
     au!
   augroup END
+  augroup! Colorizer
   let save_tab = tabpagenr()
   let save_win = winnr()
   tabdo windo call s:ClearMatches()
@@ -338,7 +339,7 @@ function! s:ClearMatches() "{{{1
 endfunction
 
 function! colorizer#ColorToggle() "{{{1
-  if exists('#Colorizer#BufRead')
+  if exists('#Colorizer')
     call colorizer#ColorClear()
     echomsg 'Disabled color code highlighting.'
   else
