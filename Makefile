@@ -9,4 +9,4 @@ install:
 	for f in $(FILES); do install -m644 $$f $(DOTVIM)/$$f; done
 
 uninstall:
-	rm -f $(FILES)
+	for f in $(FILES); do rm -f $(DOTVIM)/$$f; done
