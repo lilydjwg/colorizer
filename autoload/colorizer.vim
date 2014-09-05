@@ -281,8 +281,17 @@ function! colorizer#ColorHighlight(update, ...) "{{{1
     let s:force_group_update = 1
   endif
   for i in range(line("w0"), line("w$"))
+    " skip folded lines
+    if foldclosed(i) > 0
+      continue
+    endif
     call s:PreviewColorInLine(i)
   endfor
+
+  " A hack for colorizing after opening a folding
+  if ( winheight('.') - line('w$') + line('w0') ) > 1
+    autocmd CursorHold * silent call colorizer#ColorHighlight(1)
+  endif
   let s:force_group_update = 0
   let s:saved_fgcontrast = g:colorizer_fgcontrast
   augroup Colorizer
