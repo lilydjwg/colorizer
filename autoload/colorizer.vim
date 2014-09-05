@@ -280,13 +280,17 @@ function! colorizer#ColorHighlight(update, ...) "{{{1
   if g:colorizer_fgcontrast != s:saved_fgcontrast || (exists("a:1") && a:1 == '!')
     let s:force_group_update = 1
   endif
-  for i in range(line("w0"), line("w$"))
+
+  let cur_line = line("w0")
+  let end_line = line("w$")
+  while cur_line <= end_line
     " skip folded lines
-    if foldclosed(i) > 0
-      continue
+    if foldclosed(cur_line) > 0
+      let cur_line = foldclosedend(cur_line) + 1
     endif
-    call s:PreviewColorInLine(i)
-  endfor
+    call s:PreviewColorInLine(cur_line)
+    let cur_line += 1
+  endwhile
 
   " A hack for colorizing after opening a folding
   if ( winheight('.') - line('w$') + line('w0') ) > 1
