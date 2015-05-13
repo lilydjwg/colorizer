@@ -29,6 +29,10 @@
 " If you don't want to enable colorizer at startup, set the following:
 "	let g:colorizer_startup = 0
 "
+" You can disable it on long buffers, for example if more than 1000 lines:
+"	let g:colorizer_maxlines = 1000
+" -1 means unlimited number of lines
+"
 " Note: if you modify a color string in normal mode, if the cursor is still on
 " that line, it'll take 'updatetime' seconds to update. You can use
 " :ColorHighlight (or your key mapping) again to force update.
@@ -46,6 +50,9 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 "Define commands {{{1
+if !exists('g:colorizer_maxlines')
+  let g:colorizer_maxlines = -1
+endif
 command! -bar -bang ColorHighlight call colorizer#ColorHighlight(1, "<bang>")
 command! -bar ColorClear call colorizer#ColorClear()
 command! -bar ColorToggle call colorizer#ColorToggle()
