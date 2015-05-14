@@ -282,6 +282,9 @@ function! colorizer#ColorHighlight(update, ...) "{{{1
     endif
     call s:ClearMatches()
   endif
+  if (g:colorizer_maxlines > 0) && (g:colorizer_maxlines <= line('$'))
+    return
+  end
   let w:colormatches = {}
   if g:colorizer_fgcontrast != s:saved_fgcontrast || (exists("a:1") && a:1 == '!')
     let s:force_group_update = 1
