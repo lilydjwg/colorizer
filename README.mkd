@@ -14,3 +14,7 @@ You can install the plugin with pathogen by copying and pasting the below snippe
 The `Makefile` is used to quickly install/uninstall the script.
 
 [colorizer.vim on vim.org](http://www.vim.org/scripts/script.php?script_id=3567)
+
+#### Known issues
+
+This plugin is still ineffient for large files. I sugguest you enable it only when you need it, or set the `g:colorizer_maxlines` variable. There seems to be no way to get current displaying lines and do work with them in Vim.
