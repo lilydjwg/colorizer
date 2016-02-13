@@ -11,11 +11,12 @@ set cpo&vim
 function! s:FGforBG(bg) "{{{1
   " takes a 6hex color code and returns a matching color that is visible
   let pure = substitute(a:bg,'^#','','')
-  let r = str2nr(pure[0:1], 16)
-  let g = str2nr(pure[2:3], 16)
-  let b = str2nr(pure[4:5], 16)
+  let r     = str2nr(pure[0:1], 16)
+  let g     = str2nr(pure[2:3], 16)
+  let b     = str2nr(pure[4:5], 16)
+  let alpha = 255 - str2nr(pure[6:7], 16)
   let fgc = g:colorizer_fgcontrast
-  if r*30 + g*59 + b*11 > 12000
+  if alpha * (r*30 + g*59 + b*11) / 255 > 12000
     return s:predefined_fgcolors['dark'][fgc]
   else
     return s:predefined_fgcolors['light'][fgc]
@@ -26,9 +27,10 @@ function! s:Rgb2xterm(color) "{{{1
   " selects the nearest xterm color for a rgb value like #FF0000
   let best_match=0
   let smallest_distance = 10000000000
-  let r = str2nr(a:color[1:2], 16)
-  let g = str2nr(a:color[3:4], 16)
-  let b = str2nr(a:color[5:6], 16)
+  let r     = str2nr(a:color[1:2], 16)
+  let g     = str2nr(a:color[3:4], 16)
+  let b     = str2nr(a:color[5:6], 16)
+  let alpha = 255 - str2nr(a:color[7:8], 16)
   let colortable = s:GetXterm2rgbTable()
   for c in range(0,254)
     let d = pow(colortable[c][0]-r,2) + pow(colortable[c][1]-g,2) + pow(colortable[c][2]-b,2)
@@ -103,7 +105,7 @@ endfunction
 function! s:HexCode(str, lineno) "{{{2
   let ret = []
   let place = 0
-  let colorpat = '#[0-9A-Fa-f]\{3\}\>\|#[0-9A-Fa-f]\{6\}\>'
+  let colorpat = '#[0-9A-Fa-f]\{3\}\>\|#[0-9A-Fa-f]\{6\}\>\|#[0-9A-Fa-f]\{8\}\>\|#[0-9A-Fa-f]\{4\}\>'
   while 1
     let foundcolor = matchstr(a:str, colorpat, place)
     if foundcolor == ''
@@ -111,7 +113,7 @@ function! s:HexCode(str, lineno) "{{{2
     endif
     let place = matchend(a:str, colorpat, place)
     let pat = foundcolor . '\>'
-    if len(foundcolor) == 4
+    if len(foundcolor) == 4 || len(foundcolor) == 5
       let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
     endif
     call add(ret, [foundcolor, pat])
