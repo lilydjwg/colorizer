@@ -14,9 +14,8 @@ function! s:FGforBG(bg) "{{{1
   let r     = str2nr(pure[0:1], 16)
   let g     = str2nr(pure[2:3], 16)
   let b     = str2nr(pure[4:5], 16)
-  let alpha = 255 - str2nr(pure[6:7], 16)
   let fgc = g:colorizer_fgcontrast
-  if alpha * (r*30 + g*59 + b*11) / 255 > 12000
+  if r*30 + g*59 + b*11 > 12000
     return s:predefined_fgcolors['dark'][fgc]
   else
     return s:predefined_fgcolors['light'][fgc]
@@ -27,10 +26,9 @@ function! s:Rgb2xterm(color) "{{{1
   " selects the nearest xterm color for a rgb value like #FF0000
   let best_match=0
   let smallest_distance = 10000000000
-  let r     = str2nr(a:color[1:2], 16)
-  let g     = str2nr(a:color[3:4], 16)
-  let b     = str2nr(a:color[5:6], 16)
-  let alpha = 255 - str2nr(a:color[7:8], 16)
+  let r = str2nr(a:color[1:2], 16)
+  let g = str2nr(a:color[3:4], 16)
+  let b = str2nr(a:color[5:6], 16)
   let colortable = s:GetXterm2rgbTable()
   for c in range(0,254)
     let d = pow(colortable[c][0]-r,2) + pow(colortable[c][1]-g,2) + pow(colortable[c][2]-b,2)
@@ -101,8 +99,75 @@ function! s:SetMatcher(color, pat) "{{{1
   endif
 endfunction
 
+"ColorConverters {{{1
+function! s:RgbBgColor() "{{{2
+  let bg = synIDattr(synIDtrans(hlID("Normal")), "bg")
+  let r = str2nr(bg[1:2], 16)
+  let g = str2nr(bg[3:4], 16)
+  let b = str2nr(bg[5:6], 16)
+  return [r,g,b]
+endfunction
+
+function! s:Hexa2Rgba(hex,alpha) "{{{2
+  let r = str2nr(a:hex[1:2], 16)
+  let g = str2nr(a:hex[3:4], 16)
+  let b = str2nr(a:hex[5:6], 16)
+  let alpha = printf("%.2f", str2float(str2nr(a:alpha,16)) / 255.0)
+  return [r,g,b,alpha]
+endfunction
+
+function! s:Rgba2Rgb(r,g,b,alpha,percent,rgb_bg) "{{{2
+  " converts matched r,g,b values and percentages to [0:255]
+  " if possible, overlays r,g,b with alpha on given rgb_bg color
+  if a:percent
+    let r = a:r * 255 / 100
+    let g = a:g * 255 / 100
+    let b = a:b * 255 / 100
+  else
+    let r = a:r
+    let g = a:g
+    let b = a:b
+  endif
+  if r > 255 || g > 255 || b > 255
+    return []
+  endif
+  if empty(a:rgb_bg)
+    return [r,g,b]
+  endif
+  let alpha = str2float(a:alpha)
+  if alpha < 0
+    let alpha = 0.0
+  elseif alpha > 1
+    let alpha = 1.0
+  endif
+  if alpha == 1.0
+    return [r,g,b]
+  endif
+  let r = float2nr(ceil(r * alpha) + ceil(a:rgb_bg[0] * (1 - alpha)))
+  let g = float2nr(ceil(g * alpha) + ceil(a:rgb_bg[1] * (1 - alpha)))
+  let b = float2nr(ceil(b * alpha) + ceil(a:rgb_bg[2] * (1 - alpha)))
+  if r > 255
+    let r = 255
+  endif
+  if g > 255
+    let g = 255
+  endif
+  if b > 255
+    let b = 255
+  endif
+  return [r,g,b]
+endfunction
+
 "ColorFinders {{{1
 function! s:HexCode(str, lineno) "{{{2
+  " finds RGB: #00f #0000ff and RGBA: #00f8 #0000ff88
+  " Note that ARGB is not supported, since RGBA is much more common
+  if has("gui_running")
+    let rgb_bg = s:RgbBgColor()
+  else
+    " translucent colors would display incorrectly, so ignore the alpha value
+    let rgb_bg = []
+  endif
   let ret = []
   let place = 0
   let colorpat = '#[0-9A-Fa-f]\{3\}\>\|#[0-9A-Fa-f]\{6\}\>\|#[0-9A-Fa-f]\{8\}\>\|#[0-9A-Fa-f]\{4\}\>'
@@ -116,7 +181,20 @@ function! s:HexCode(str, lineno) "{{{2
     if len(foundcolor) == 4 || len(foundcolor) == 5
       let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
     endif
-    call add(ret, [foundcolor, pat])
+    if len(foundcolor) == 9
+      let alpha      = foundcolor[7:8]
+      let foundcolor = foundcolor[0:6]
+    else
+      let alpha = 'ff'
+    endif
+    if empty(rgb_bg) || tolower(alpha) == 'ff'
+      call add(ret, [foundcolor, pat])
+    else
+      let rgba    = s:Hexa2Rgba(foundcolor, alpha)
+      let rgb     = s:Rgba2Rgb(rgba[0], rgba[1], rgba[2], rgba[3], 0, rgb_bg)
+      let l:color = printf('#%02x%02x%02x', rgb[0], rgb[1], rgb[2])
+      call add(ret, [l:color, pat])
+    endif
   endwhile
   return ret
 endfunction
@@ -155,90 +233,35 @@ endfunction
 
 function! s:RgbaColor(str, lineno) "{{{2
   if has("gui_running")
-    let bg = synIDattr(synIDtrans(hlID("Normal")), "bg")
-    let bg_r = str2nr(bg[1].bg[2], 16)
-    let bg_g = str2nr(bg[3].bg[4], 16)
-    let bg_b = str2nr(bg[5].bg[6], 16)
+    let printpat = '\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\s*%s0*\s*\)'
+    let rgb_bg = s:RgbBgColor()
   else
     " translucent colors would display incorrectly, so ignore the alpha value
-    return s:RgbaColorForTerm(a:str, a:lineno)
+    let printpat = '\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\ze\s*(-?[.[:digit:]]+)\s*\)'
+    let rgb_bg = ''
   endif
   let ret = []
   let place = 0
+  let percent = 0
   let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
   while 1
     let foundcolor = matchlist(a:str, colorpat, place)
     if empty(foundcolor)
       break
     endif
-    let place = matchend(a:str, colorpat, place)
     if foundcolor[2] == '%'
-      let ar = foundcolor[1] * 255 / 100
-      let ag = foundcolor[3] * 255 / 100
-      let ab = foundcolor[4] * 255 / 100
-    else
-      let ar = foundcolor[1]
-      let ag = foundcolor[3]
-      let ab = foundcolor[4]
+      let percent = 1
     endif
-    if ar > 255 || ag > 255 || ab > 255
-      break
-    endif
-    let alpha = str2float(foundcolor[5])
-    if alpha < 0
-      let alpha = 0.0
-    elseif alpha > 1
-      let alpha = 1.0
-    endif
-    let pat = printf('\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\s*%s0*\s*\)', foundcolor[1], foundcolor[3], foundcolor[4], foundcolor[5])
-    if foundcolor[2] == '%'
-      let pat = substitute(pat, '%', '\\%', 'g')
-    endif
-    let r = float2nr(ceil(ar * alpha) + ceil(bg_r * (1 - alpha)))
-    let g = float2nr(ceil(ag * alpha) + ceil(bg_g * (1 - alpha)))
-    let b = float2nr(ceil(ab * alpha) + ceil(bg_b * (1 - alpha)))
-    if r > 255
-      let r = 255
-    endif
-    if g > 255
-      let g = 255
-    endif
-    if b > 255
-      let b = 255
-    endif
-    let l:color = printf('#%02x%02x%02x', r, g, b)
-    call add(ret, [l:color, pat])
-  endwhile
-  return ret
-endfunction
-
-function! s:RgbaColorForTerm(str, lineno) "{{{2
-  let ret = []
-  let place = 0
-  let colorpat = '\<rgba(\v\s*(\d+(\%)?)\s*,\s*(\d+%(\2))\s*,\s*(\d+%(\2))\s*,\s*(-?[.[:digit:]]+)\s*\)'
-  while 1
-    let foundcolor = matchlist(a:str, colorpat, place)
-    if empty(foundcolor)
+    let rgb = s:Rgba2Rgb(foundcolor[1], foundcolor[3], foundcolor[4], foundcolor[5], percent, rgb_bg)
+    if empty(rgb)
       break
     endif
     let place = matchend(a:str, colorpat, place)
-    if foundcolor[2] == '%'
-      let ar = foundcolor[1] * 255 / 100
-      let ag = foundcolor[3] * 255 / 100
-      let ab = foundcolor[4] * 255 / 100
-    else
-      let ar = foundcolor[1]
-      let ag = foundcolor[3]
-      let ab = foundcolor[4]
-    endif
-    if ar > 255 || ag > 255 || ab > 255
-      break
-    endif
-    let pat = printf('\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\ze\s*(-?[.[:digit:]]+)\s*\)', foundcolor[1], foundcolor[3], foundcolor[4])
-    if foundcolor[2] == '%'
+    let pat = printf(printpat, foundcolor[1], foundcolor[3], foundcolor[4], foundcolor[5])
+    if percent
       let pat = substitute(pat, '%', '\\%', 'g')
     endif
-    let l:color = printf('#%02x%02x%02x', ar, ag, ab)
+    let l:color = printf('#%02x%02x%02x', rgb[0], rgb[1], rgb[2])
     call add(ret, [l:color, pat])
   endwhile
   return ret
@@ -384,4 +407,4 @@ let s:saved_fgcontrast = g:colorizer_fgcontrast
 " Restoration and modelines {{{1
 let &cpo = s:keepcpo
 unlet s:keepcpo
-" vim:ft=vim:fdm=marker:fmr={{{,}}}:
+" vim:ft=vim:fdm=marker:fmr={{{,}}}:ts=8:sw=2:sts=2:et
