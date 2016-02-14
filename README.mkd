@@ -18,7 +18,7 @@ Use the `Makefile` to quickly install/uninstall the script, or simply copy
 `plugin/colorizer.vim` and `autoload/colorizer.vim` to your `.vim` dir.
 
 ### Origin
-This verion is based on https://github.com/lilydjwg/colorizer, also found as 
+This version is based on https://github.com/lilydjwg/colorizer, also found as 
 [colorizer.vim on vim.org](http://www.vim.org/scripts/script.php?script_id=3567)
 
 ### Known issues
