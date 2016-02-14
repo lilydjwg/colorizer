@@ -66,4 +66,4 @@ endif
 
 " Cleanup and modelines {{{1
 let &cpo = s:save_cpo
-" vim:ft=vim:fdm=marker:fmr={{{,}}}:
+" vim:ft=vim:fdm=marker:fmr={{{,}}}:ts=8:sw=2:sts=2:

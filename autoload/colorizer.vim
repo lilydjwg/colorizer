@@ -178,8 +178,18 @@ function! s:HexCode(str, lineno) "{{{2
     endif
     let place = matchend(a:str, colorpat, place)
     let pat = foundcolor . '\>'
-    if len(foundcolor) == 4 || len(foundcolor) == 5
+    let colorlen = len(foundcolor)
+    if colorlen == 4 || colorlen == 5
+      let hr = tolower(foundcolor[1])
+      let hg = tolower(foundcolor[2])
+      let hb = tolower(foundcolor[3])
+      let ha = tolower(foundcolor[4])
       let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
+    else
+      let hr = tolower(foundcolor[1:2])
+      let hg = tolower(foundcolor[3:4])
+      let hb = tolower(foundcolor[5:6])
+      let ha = tolower(foundcolor[7:8])
     endif
     if len(foundcolor) == 9
       let alpha      = foundcolor[7:8]
@@ -187,6 +197,14 @@ function! s:HexCode(str, lineno) "{{{2
     else
       let alpha = 'ff'
     endif
+    if empty(rgb_bg)
+      if colorlen == 5
+        let pat = printf('\c#%s%s%s\ze\x\>', hr,hg,hb)
+      endif
+      if colorlen == 9
+        let pat = printf('\c#%s%s%s\ze\x\x\>', hr,hg,hb)
+      endif
+    endif    
     if empty(rgb_bg) || tolower(alpha) == 'ff'
       call add(ret, [foundcolor, pat])
     else
@@ -233,12 +251,10 @@ endfunction
 
 function! s:RgbaColor(str, lineno) "{{{2
   if has("gui_running")
-    let printpat = '\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\s*%s0*\s*\)'
     let rgb_bg = s:RgbBgColor()
   else
     " translucent colors would display incorrectly, so ignore the alpha value
-    let printpat = '\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\ze\s*(-?[.[:digit:]]+)\s*\)'
-    let rgb_bg = ''
+    let rgb_bg = []
   endif
   let ret = []
   let place = 0
@@ -257,7 +273,11 @@ function! s:RgbaColor(str, lineno) "{{{2
       break
     endif
     let place = matchend(a:str, colorpat, place)
-    let pat = printf(printpat, foundcolor[1], foundcolor[3], foundcolor[4], foundcolor[5])
+    if empty(rgb_bg)
+      let pat = printf('\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\ze\s*(-?[.[:digit:]]+)\s*\)', foundcolor[1], foundcolor[3], foundcolor[4])
+    else
+      let pat = printf('\<rgba(\v\s*%s\s*,\s*%s\s*,\s*%s\s*,\s*%s0*\s*\)', foundcolor[1], foundcolor[3], foundcolor[4], foundcolor[5])
+    endif
     if percent
       let pat = substitute(pat, '%', '\\%', 'g')
     endif
