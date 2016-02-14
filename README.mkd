@@ -1,20 +1,24 @@
 # Colorizer
 
-A Vim plugin to colorize all text in the form #rrggbb or #rgb. See the comment at the beginning of the [plugin](https://github.com/lilydjwg/colorizer/tree/master/plugin/colorizer.vim) for more.
+A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa, rgb(...), rgba(...). See the comment at the beginning of the [plugin](https://github.com/lilydjwg/colorizer/tree/master/plugin/colorizer.vim) for more.
 
 ![screenshot](https://github.com/lilydjwg/colorizer/raw/master/screenshot.png)
 
-#### Pathogen
+### Installation
 
-You can install the plugin with pathogen by copying and pasting the below snippet.
+#### Pathogen, Vundle, etc.
 
     cd ~/.vim/bundle
-    git clone https://github.com/lilydjwg/colorizer
+    git clone https://github.com/ubunatic/colorizer
+    
+#### Manually
+Use the `Makefile` to quickly install/uninstall the script, or simply copy
+`plugin/colorizer.vim` and `autoload/colorizer.vim` to your `.vim` dir.
 
-The `Makefile` is used to quickly install/uninstall the script.
-
+### Origin
+This verion is based on https://github.com/lilydjwg/colorizer, also found as 
 [colorizer.vim on vim.org](http://www.vim.org/scripts/script.php?script_id=3567)
 
-#### Known issues
+### Known issues
 
-This plugin is still inefficient for large files. I sugguest you enable it only when you need it, or set the `g:colorizer_maxlines` variable. There seems to be no way to get current displaying lines and do work with them in Vim.
+This plugin is still inefficient for large files. I strongly sugguest you enable it only when you need it, or set the `g:colorizer_maxlines` variable, e.g. to `1000`. There seems to be no way to get current displaying lines and do work with them in Vim.
