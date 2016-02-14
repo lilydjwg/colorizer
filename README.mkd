@@ -1,8 +1,8 @@
 # Colorizer
 
-A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa, rgb(...), rgba(...). See the comment at the beginning of the [plugin](https://github.com/lilydjwg/colorizer/tree/master/plugin/colorizer.vim) for more.
+A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa, rgb(...), rgba(...). See the comment at the beginning of the [plugin](https://github.com/ubunatic/colorizer/tree/master/plugin/colorizer.vim) for more.
 
-![screenshot](https://github.com/lilydjwg/colorizer/raw/master/screenshot.png)
+![screenshot](https://github.com/ubunatic/colorizer/raw/master/screenshot.png)
 
 ### Installation
 
