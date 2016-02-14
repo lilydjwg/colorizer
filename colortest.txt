@@ -12,6 +12,8 @@ This file lists various colors, for testing the supported color syntax
 #0003   #3333   #6663   #9993   #ccc3   #fff3
 #0000   #3330   #6660   #9990   #ccc0   #fff0
 
+#00f#08f#0ff#0f8#0f0#8f0#ff0#f80#f00#f08#f0f#80f
+
 #f00f #f00c #f009 #f006 #f003 #f000
 
 rgba(255,0,0,1.0)  rgba(100%,0%,0%,1.0)  #f00f  #0f0f  #00ff
