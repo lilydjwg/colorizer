@@ -2,7 +2,9 @@
 
 A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa, rgb(...), rgba(...). See the comment at the beginning of the [plugin](https://github.com/ubunatic/colorizer/tree/master/plugin/colorizer.vim) for more.
 
-![screenshot](https://github.com/ubunatic/colorizer/raw/master/screenshot.png)
+![screenshot](https://github.com/ubunatic/colorizer/raw/master/screenshot-2.png)
+The left screen shows `colortest.txt` open in `vim` in `gnome-terminal`.
+The right screen shows `colortest.txt` open in `gvim`.
 
 ### Installation
 
