@@ -11,9 +11,9 @@ set cpo&vim
 function! s:FGforBG(bg) "{{{1
   " takes a 6hex color code and returns a matching color that is visible
   let pure = substitute(a:bg,'^#','','')
-  let r     = str2nr(pure[0:1], 16)
-  let g     = str2nr(pure[2:3], 16)
-  let b     = str2nr(pure[4:5], 16)
+  let r = str2nr(pure[0:1], 16)
+  let g = str2nr(pure[2:3], 16)
+  let b = str2nr(pure[4:5], 16)
   let fgc = g:colorizer_fgcontrast
   if r*30 + g*59 + b*11 > 12000
     return s:predefined_fgcolors['dark'][fgc]
@@ -99,7 +99,7 @@ function! s:SetMatcher(color, pat) "{{{1
   endif
 endfunction
 
-"ColorConverters {{{1
+"i Color Converters {{{1
 function! s:RgbBgColor() "{{{2
   let bg = synIDattr(synIDtrans(hlID("Normal")), "bg")
   let r = str2nr(bg[1:2], 16)
@@ -204,7 +204,7 @@ function! s:HexCode(str, lineno) "{{{2
       if colorlen == 9
         let pat = printf('\c#%s%s%s\ze\x\x\>', hr,hg,hb)
       endif
-    endif    
+    endif
     if empty(rgb_bg) || tolower(alpha) == 'ff'
       call add(ret, [foundcolor, pat])
     else

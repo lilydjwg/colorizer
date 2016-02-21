@@ -1,21 +1,29 @@
 # Colorizer
 
-A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa, rgb(...), rgba(...). See the comment at the beginning of the [plugin](https://github.com/ubunatic/colorizer/tree/master/plugin/colorizer.vim) for more.
+A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa,
+rgb(...), rgba(...). See the comment at the beginning of the
+[plugin](https://github.com/lilydjwg/colorizer/tree/master/plugin/colorizer.vim)
+for more options.
 
-![screenshot](https://github.com/ubunatic/colorizer/raw/master/screenshot-2.png)
-The left screen shows `colortest.txt` open in `vim` in `gnome-terminal`.
-The right screen shows `colortest.txt` open in `gvim`.
+Screenshots:
+
+![screenshot](https://github.com/lilydjwg/colorizer/raw/master/screenshot.png)
+
+![screenshot](https://github.com/lilydjwg/colorizer/raw/master/screenshot-2.png)
+The left screen shows `colortest.txt` in Vim in xfce4-terminal.
+The right screen shows `colortest.txt` in gVim.
 
 ### Installation
 
 #### Pathogen, Vundle, etc.
 
     cd ~/.vim/bundle
-    git clone https://github.com/ubunatic/colorizer
+    git clone https://github.com/lilydjwg/colorizer
     
 #### Manually
-Use the `Makefile` to quickly install/uninstall the script, or simply copy
-`plugin/colorizer.vim` and `autoload/colorizer.vim` to your `.vim` dir.
+Use `make install` and `make uninstall` to quickly install/uninstall the
+script, or simply copy `plugin/colorizer.vim` and `autoload/colorizer.vim` to
+your `.vim` dir.
 
 ### Origin
 This version is based on https://github.com/lilydjwg/colorizer, also found as 
@@ -23,4 +31,7 @@ This version is based on https://github.com/lilydjwg/colorizer, also found as
 
 ### Known issues
 
-This plugin is still inefficient for large files. I strongly sugguest you enable it only when you need it, or set the `g:colorizer_maxlines` variable, e.g. to `1000`. There seems to be no way to get current displaying lines and do work with them in Vim.
+This plugin is still inefficient for large files. I strongly sugguest you
+enable it only when you need it, or set the `g:colorizer_maxlines` variable,
+e.g. to `1000`. There seems to be no way to get current displaying lines and do
+work with them in Vim.
