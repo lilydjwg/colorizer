@@ -99,7 +99,7 @@ function! s:SetMatcher(color, pat) "{{{1
   endif
 endfunction
 
-"i Color Converters {{{1
+" Color Converters {{{1
 function! s:RgbBgColor() "{{{2
   let bg = synIDattr(synIDtrans(hlID("Normal")), "bg")
   let r = str2nr(bg[1:2], 16)
@@ -192,8 +192,13 @@ function! s:HexCode(str, lineno) "{{{2
       let ha = tolower(foundcolor[7:8])
     endif
     if len(foundcolor) == 9
-      let alpha      = foundcolor[7:8]
-      let foundcolor = foundcolor[0:6]
+      if get(g:, 'colorizer_hex_alpha_first') == 1
+        let alpha      = foundcolor[1:2]
+        let foundcolor = '#'.foundcolor[3:8]
+      else
+        let alpha      = foundcolor[7:8]
+        let foundcolor = foundcolor[0:6]
+      endif
     else
       let alpha = 'ff'
     endif

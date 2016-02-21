@@ -33,6 +33,10 @@
 "	let g:colorizer_maxlines = 1000
 " -1 means unlimited number of lines
 "
+" There are color strings in the format #RRGGBBAA and #AARRGGBB. The former is
+" more common so it's the default. If you want the latter, set the following:
+"	let g:colorizer_hex_alpha_first = 1
+"
 " Note: if you modify a color string in normal mode, if the cursor is still on
 " that line, it'll take 'updatetime' seconds to update. You can use
 " :ColorHighlight (or your key mapping) again to force update.
