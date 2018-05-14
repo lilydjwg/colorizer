@@ -45,7 +45,7 @@
 " different colors. GUI version is much quicker.
 
 " Reload guard and 'compatible' handling {{{1
-if exists("loaded_colorizer") || v:version < 700 || !(has("gui_running") || &t_Co == 256)
+if exists("loaded_colorizer") || v:version < 700 || !(has("gui_running") || &t_Co == 256 || &termguicolors)
   finish
 endif
 let loaded_colorizer = 1
