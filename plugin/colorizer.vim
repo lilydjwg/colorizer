@@ -41,7 +41,7 @@
 " that line, it'll take 'updatetime' seconds to update. You can use
 " :ColorHighlight (or your key mapping) again to force update.
 "
-" Performace Notice: In terminal, it may take several seconds to highlight 240
+" Performance Notice: In terminal, it may take several seconds to highlight 240
 " different colors. GUI version is much quicker.
 
 " Reload guard and 'compatible' handling {{{1
