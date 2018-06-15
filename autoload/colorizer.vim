@@ -160,8 +160,7 @@ endfunction
 
 "ColorFinders {{{1
 function! s:HexCode(str, lineno) "{{{2
-  " finds RGB: #00f #0000ff and RGBA: #00f8 #0000ff88
-  " Note that ARGB is not supported, since RGBA is much more common
+  " finds RGB: #00f #0000ff and RGBA: #00f8 #0000ff88 (or ARGB: #800f #880000ff)
   if has("gui_running")
     let rgb_bg = s:RgbBgColor()
   else
@@ -179,35 +178,57 @@ function! s:HexCode(str, lineno) "{{{2
     let place = matchend(a:str, colorpat, place)
     let pat = foundcolor . '\>'
     let colorlen = len(foundcolor)
-    if colorlen == 4 || colorlen == 5
-      let hr = tolower(foundcolor[1])
-      let hg = tolower(foundcolor[2])
-      let hb = tolower(foundcolor[3])
-      let ha = tolower(foundcolor[4])
-      let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
-    else
-      let hr = tolower(foundcolor[1:2])
-      let hg = tolower(foundcolor[3:4])
-      let hb = tolower(foundcolor[5:6])
-      let ha = tolower(foundcolor[7:8])
-    endif
-    if len(foundcolor) == 9
-      if get(g:, 'colorizer_hex_alpha_first') == 1
+    if get(g:, 'colorizer_hex_alpha_first') == 1
+      if colorlen == 4 || colorlen == 5
+        let ha = tolower(foundcolor[1])
+        let hr = tolower(foundcolor[2])
+        let hg = tolower(foundcolor[3])
+        let hb = tolower(foundcolor[4])
+        let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
+      else
+        let ha = tolower(foundcolor[1:2])
+        let hr = tolower(foundcolor[3:4])
+        let hg = tolower(foundcolor[5:6])
+        let hb = tolower(foundcolor[7:8])
+      endif
+      if len(foundcolor) == 9
         let alpha      = foundcolor[1:2]
         let foundcolor = '#'.foundcolor[3:8]
       else
-        let alpha      = foundcolor[7:8]
-        let foundcolor = foundcolor[0:6]
+        let alpha = 'ff'
+      endif
+      if empty(rgb_bg)
+        if colorlen == 5
+          let pat = printf('\c#\x\zs%s%s%s\ze\>', hr,hg,hb)
+        elseif colorlen == 9
+          let pat = printf('\c#\x\x\zs%s%s%s\ze\>', hr,hg,hb)
+        endif
       endif
     else
-      let alpha = 'ff'
-    endif
-    if empty(rgb_bg)
-      if colorlen == 5
-        let pat = printf('\c#%s%s%s\ze\x\>', hr,hg,hb)
+      if colorlen == 4 || colorlen == 5
+        let hr = tolower(foundcolor[1])
+        let hg = tolower(foundcolor[2])
+        let hb = tolower(foundcolor[3])
+        let ha = tolower(foundcolor[4])
+        let foundcolor = substitute(foundcolor, '[[:xdigit:]]', '&&', 'g')
+      else
+        let hr = tolower(foundcolor[1:2])
+        let hg = tolower(foundcolor[3:4])
+        let hb = tolower(foundcolor[5:6])
+        let ha = tolower(foundcolor[7:8])
       endif
-      if colorlen == 9
-        let pat = printf('\c#%s%s%s\ze\x\x\>', hr,hg,hb)
+      if len(foundcolor) == 9
+        let alpha      = foundcolor[7:8]
+        let foundcolor = foundcolor[0:6]
+      else
+        let alpha = 'ff'
+      endif
+      if empty(rgb_bg)
+        if colorlen == 5
+          let pat = printf('\c#%s%s%s\ze\x\>', hr,hg,hb)
+        elseif colorlen == 9
+          let pat = printf('\c#%s%s%s\ze\x\x\>', hr,hg,hb)
+        endif
       endif
     endif
     if empty(rgb_bg) || tolower(alpha) == 'ff'
@@ -249,6 +270,44 @@ function! s:RgbColor(str, lineno) "{{{2
       let pat = substitute(pat, '%', '\\%', 'g')
     endif
     let l:color = printf('#%02x%02x%02x', r, g, b)
+    call add(ret, [l:color, pat])
+  endwhile
+  return ret
+endfunction
+
+function! s:ArgbColor(str, lineno) "{{{2
+  if has("gui_running")
+    let rgb_bg = s:RgbBgColor()
+  else
+    " translucent colors would display incorrectly, so ignore the alpha value
+    let rgb_bg = []
+  endif
+  let ret = []
+  let place = 0
+  let percent = 0
+  let colorpat = '\<argb(\v\s*(-?[.[:digit:]]+)\s*,\s*(\d+(\%)?)\s*,\s*(\d+%(\3))\s*,\s*(\d+%(\3))\s*\)'
+  while 1
+    let foundcolor = matchlist(a:str, colorpat, place)
+    if empty(foundcolor)
+      break
+    endif
+    if foundcolor[3] == '%'
+      let percent = 1
+    endif
+    let rgb = s:Rgba2Rgb(foundcolor[2], foundcolor[4], foundcolor[5], foundcolor[1], percent, rgb_bg)
+    if empty(rgb)
+      break
+    endif
+    let place = matchend(a:str, colorpat, place)
+    if empty(rgb_bg)
+      let pat = printf('\<argb(\v\s*(-?[.[:digit:]]+)\s*\zs,\s*%s\s*,\s*%s\s*,\s*%s\s*\)', foundcolor[2], foundcolor[4], foundcolor[5])
+    else
+      let pat = printf('\<argb(\v\s*%s0*\s*\,\s*%s\s*,\s*%s\s*,\s*%s\s*\)', foundcolor[1], foundcolor[2], foundcolor[4], foundcolor[5])
+    endif
+    if percent
+      let pat = substitute(pat, '%', '\\%', 'g')
+    endif
+    let l:color = printf('#%02x%02x%02x', rgb[0], rgb[1], rgb[2])
     call add(ret, [l:color, pat])
   endwhile
   return ret
@@ -401,7 +460,18 @@ function! colorizer#ColorToggle() "{{{1
   endif
 endfunction
 
-function! s:GetXterm2rgbTable()
+function! colorizer#AlphaPositionToggle() "{{{1
+  if exists('#Colorizer')
+    if get(g:, 'colorizer_hex_alpha_first') == 1
+      let g:colorizer_hex_alpha_first = 0
+    else
+      let g:colorizer_hex_alpha_first = 1
+    endif
+    call colorizer#ColorHighlight(1)
+  endif
+endfunction
+
+function! s:GetXterm2rgbTable() "{{{1
   if !exists('s:table_xterm2rgb')
     let s:table_xterm2rgb = []
     for c in range(0, 254)
@@ -413,7 +483,7 @@ function! s:GetXterm2rgbTable()
 endfun
 
 " Setups {{{1
-let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor')]
+let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor'), function('s:ArgbColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
 let s:predefined_fgcolors['dark']  = ['#444444', '#222222', '#000000']
