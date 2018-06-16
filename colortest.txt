@@ -16,9 +16,9 @@ This file lists various colors, for testing the supported color syntax
 
 #f00f #f00c #f009 #f006 #f003 #f000
 
-rgba(255,0,0,1.0)  rgba(100%,0%,0%,1.0)  #f00f  #0f0f  #00ff
-rgba(255,0,0,0.5)  rgba(100%,0%,0%,0.5)  #f008  #0f08  #00f8
-rgba(255,0,0,0.3)  rgba(100%,0%,0%,0.3)  #f004  #0f04  #00f4
+rgba(255,0,0,1.0)  rgba(100%,0%,0%,1.0)  #f00f  #0f0f  #00ff #ff00  #f0f0  #f00f
+rgba(255,0,0,0.5)  rgba(100%,0%,0%,0.5)  #f008  #0f08  #00f8 #8f00  #80f0  #800f
+rgba(255,0,0,0.3)  rgba(100%,0%,0%,0.3)  #f004  #0f04  #00f4 #4f00  #40f0  #400f
 
 
 rgb(255,0,0) rgb(128,0,0)  rgb(64,0,0)
