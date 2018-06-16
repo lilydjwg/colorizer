@@ -275,44 +275,6 @@ function! s:RgbColor(str, lineno) "{{{2
   return ret
 endfunction
 
-function! s:ArgbColor(str, lineno) "{{{2
-  if has("gui_running")
-    let rgb_bg = s:RgbBgColor()
-  else
-    " translucent colors would display incorrectly, so ignore the alpha value
-    let rgb_bg = []
-  endif
-  let ret = []
-  let place = 0
-  let percent = 0
-  let colorpat = '\<argb(\v\s*(-?[.[:digit:]]+)\s*,\s*(\d+(\%)?)\s*,\s*(\d+%(\3))\s*,\s*(\d+%(\3))\s*\)'
-  while 1
-    let foundcolor = matchlist(a:str, colorpat, place)
-    if empty(foundcolor)
-      break
-    endif
-    if foundcolor[3] == '%'
-      let percent = 1
-    endif
-    let rgb = s:Rgba2Rgb(foundcolor[2], foundcolor[4], foundcolor[5], foundcolor[1], percent, rgb_bg)
-    if empty(rgb)
-      break
-    endif
-    let place = matchend(a:str, colorpat, place)
-    if empty(rgb_bg)
-      let pat = printf('\<argb(\v\s*(-?[.[:digit:]]+)\s*\zs,\s*%s\s*,\s*%s\s*,\s*%s\s*\)', foundcolor[2], foundcolor[4], foundcolor[5])
-    else
-      let pat = printf('\<argb(\v\s*%s0*\s*\,\s*%s\s*,\s*%s\s*,\s*%s\s*\)', foundcolor[1], foundcolor[2], foundcolor[4], foundcolor[5])
-    endif
-    if percent
-      let pat = substitute(pat, '%', '\\%', 'g')
-    endif
-    let l:color = printf('#%02x%02x%02x', rgb[0], rgb[1], rgb[2])
-    call add(ret, [l:color, pat])
-  endwhile
-  return ret
-endfunction
-
 function! s:RgbaColor(str, lineno) "{{{2
   if has("gui_running")
     let rgb_bg = s:RgbBgColor()
@@ -483,7 +445,7 @@ function! s:GetXterm2rgbTable() "{{{1
 endfun
 
 " Setups {{{1
-let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor'), function('s:ArgbColor')]
+let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
 let s:predefined_fgcolors['dark']  = ['#444444', '#222222', '#000000']
