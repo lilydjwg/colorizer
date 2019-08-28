@@ -177,6 +177,13 @@ function! s:HexCode(str, lineno) "{{{2
     endif
     let place = matchend(a:str, colorpat, place)
     let pat = foundcolor . '\>'
+    if foundcolor =~ "0x"
+      " for colors starting with "\0", convert to "#" format before operating on them
+      let colorpat = substitute(colorpat, "\0", "#", "")
+      let alt_hex = 1
+    else
+      let alt_hex = 0
+    endif
     let colorlen = len(foundcolor)
     if get(g:, 'colorizer_hex_alpha_first') == 1
       if colorlen == 4 || colorlen == 5
@@ -236,7 +243,11 @@ function! s:HexCode(str, lineno) "{{{2
     else
       let rgba    = s:Hexa2Rgba(foundcolor, alpha)
       let rgb     = s:Rgba2Rgb(rgba[0], rgba[1], rgba[2], rgba[3], 0, rgb_bg)
-      let l:color = printf('#%02x%02x%02x', rgb[0], rgb[1], rgb[2])
+      if alt_hex == 1
+        let l:color = printf('\0%02x%02x%02x', rgb[0], rgb[1], rgb[2])
+      else
+        let l:color = printf('#%02x%02x%02x', rgb[0], rgb[1], rgb[2])
+      endif
       call add(ret, [l:color, pat])
     endif
   endwhile
