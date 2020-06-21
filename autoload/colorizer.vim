@@ -88,7 +88,7 @@ function! s:SetMatcher(color, pat) "{{{1
   let group = 'Color' . strpart(a:color, 1)
   if !hlexists(group) || s:force_group_update
     let fg = g:colorizer_fgcontrast < 0 ? a:color : s:FGforBG(a:color)
-    if &t_Co == 256
+    if &t_Co == 256 && !(has('termguicolors') && &termguicolors)
       exe 'hi '.group.' ctermfg='.s:Rgb2xterm(fg).' ctermbg='.s:Rgb2xterm(a:color)
     endif
     " Always set gui* as user may switch to GUI version and it's cheap
@@ -276,7 +276,7 @@ function! s:RgbColor(str, lineno) "{{{2
 endfunction
 
 function! s:RgbaColor(str, lineno) "{{{2
-  if has("gui_running")
+  if has("gui_running") || (has("termguicolors") && &termguicolors)
     let rgb_bg = s:RgbBgColor()
   else
     " translucent colors would display incorrectly, so ignore the alpha value
