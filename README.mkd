@@ -1,5 +1,7 @@
 # Colorizer
 
+Note: you are advised to use [vim-hexokinase](https://github.com/RRethy/vim-hexokinase) instead.
+
 A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa,
 rgb(...), rgba(...). See the comment at the beginning of the
 [plugin](https://github.com/lilydjwg/colorizer/tree/master/plugin/colorizer.vim)
