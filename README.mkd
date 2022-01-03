@@ -1,6 +1,8 @@
 # Colorizer
 
 Note: you are advised to use [vim-hexokinase](https://github.com/RRethy/vim-hexokinase) instead.
+Or if you do not want to build a Go binary and want pure VimScript instead, you can try [BourgeoisBear's fork](https://github.com/BourgeoisBear/clrzr)
+which is expected to be faster and well-maintained.
 
 A Vim plugin to colorize all text in the form #rgb, #rgba, #rrggbb, #rrgbbaa,
 rgb(...), rgba(...). See the comment at the beginning of the
